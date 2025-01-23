@@ -51,7 +51,6 @@ and invoke the methods/functions defined in ``classification.py`` and ``improvem
 
 ### Initial set-up
 
-Steps to run a local version of the repo
 
 #### Clone the repository
 ```
@@ -81,7 +80,7 @@ git checkout -b [branch_name]
 git branch
 ```
 
-#### Switch bewteen branches
+#### Switch between branches
 ```
 git checkout [branch_name]
 git checkout main
