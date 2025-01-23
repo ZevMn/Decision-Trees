@@ -49,6 +49,36 @@ and invoke the methods/functions defined in ``classification.py`` and ``improvem
 
 ### Instructions
 
+## Usage
+
+Steps to run a local version of the repo
+
+#### Clone the repository
+```
+git clone https://gitlab.doc.ic.ac.uk/lab2425_spring/intro2ml_cw1_12.git
+```
+
+#### Create and activate a venv
+```
+python -m venv venv
+source venv/bin/activate
+```
+
+#### Install packages
+```
+pip install -r requirements.txt
+```
+
+#### Create a branch
+```
+git checkout -b [branch_name]
+```
+
+#### When pushing to remote, set an upstream branch like the below
+```
+git push -u origin [branch_name]
+```
+
 < Insert your own instructions here >
 
 
