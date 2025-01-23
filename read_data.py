@@ -47,8 +47,8 @@ def display_barcharts(x1, y1, x2, y2, classes):
     ratio_list2 = []
 
     for i in classes:
-        ratio1 = y1.count(i) / len(y1)
-        ratio2 = y2.count(i) / len(y2)
+        ratio1 = np.count_nonzero(y1 == i) / len(y1)
+        ratio2 = np.count_nonzero(y2 == i) / len(y2)
         ratio_list1.append(ratio1)
         ratio_list2.append(ratio2)
 
@@ -57,14 +57,16 @@ def display_barcharts(x1, y1, x2, y2, classes):
     bar_positions = np.arange(len(chart_labels))
     width = 0.35
 
-    plt.bar(bar_positions - width / 2, ratio_list1, width, label=chart_labels, color='blue', alpha=0.7)
-    plt.bar(bar_positions - width / 2, ratio_list2, width, label=chart_labels, color='blue', alpha=0.7)
+    plt.bar(bar_positions + width / 2, ratio_list1, width, label=chart_labels, color='blue', alpha=0.7, )
+    plt.bar(bar_positions - width / 2, ratio_list2, width, label=chart_labels, color='green', alpha=0.7)
 
     plt.xlabel('Characters')
     plt.ylabel('Ratios')
     plt.title('Distribution of character appearances in datasets')
     plt.xticks(bar_positions, chart_labels)
-    plt.legend()
+    plt.legend(
+        handles=[plt.Line2D([0], [0], marker='o', color='w', label='Full dataset', markerfacecolor='blue', markersize=10),
+                 plt.Line2D([0], [0], marker='o', color='w', label='Subset dataset', markerfacecolor='green', markersize=10)])
 
     plt.tight_layout()
     plt.show()
