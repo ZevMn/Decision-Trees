@@ -47,9 +47,9 @@ Complete this function as an interface to your new/improved decision tree classi
 and invoke the methods/functions defined in ``classification.py`` and ``improvement.py``.
 
 
-### Instructions
+## Instructions for using git
 
-## Usage
+### Initial set-up
 
 Steps to run a local version of the repo
 
@@ -69,9 +69,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Using branches
+
 #### Create a branch
 ```
 git checkout -b [branch_name]
+```
+
+#### List all branches
+```
+git branch
+```
+
+#### Switch bewteen branches
+```
+git checkout [branch_name]
+git checkout main
 ```
 
 #### When pushing to remote, set an upstream branch like the below
@@ -79,7 +92,32 @@ git checkout -b [branch_name]
 git push -u origin [branch_name]
 ```
 
-< Insert your own instructions here >
+### Workflow
+
+#### Always update your local main branch
+```
+git checkout main
+git pull origin main
+```
+
+#### Switch to your feature branch and merge latest main
+```
+git checkout [branch_name]
+git merge main
+```
+
+#### Stage and commit your changes
+```
+git add .
+git commit -m "Descriptive commit message"
+```
+
+#### Push your branch to remote repository
+```
+git push -u origin [branch_name]
+```
+
+
 
 
 
