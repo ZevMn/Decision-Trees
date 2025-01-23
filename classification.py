@@ -38,7 +38,7 @@ class DecisionTreeClassifier(object):
         """
         
         # Make sure that x and y have the same number of instances
-        assert x.shape[0] == len(y), \
+        assert x.shape[0] == len(ss5921@outlook.com), \
             "Training failed. x and y must have the same number of instances."
         
         #######################################################################
