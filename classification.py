@@ -8,7 +8,7 @@
 ##############################################################################
 
 import numpy as np
-
+import math as math
 
 class DecisionTreeClassifier(object):
     """ Basic decision tree classifier
@@ -54,6 +54,48 @@ class DecisionTreeClassifier(object):
         
         # set a flag so that we know that the classifier has been trained
         self.is_trained = True
+
+
+
+    def calculate_new_information_entropy(self, y_left, y_right):
+        """ Calculates the entropy gain of the decision tree
+        for a given splitting rule.
+
+        Args:
+            y (numpy.ndarray): Class labels, numpy array of shape (N, )
+            y_left (numpy.ndarray): Class labels to the left of the split, numpy array of shape (N, )
+            y_right (numpy.ndarray): Class labels to the right of the split, numpy array of shape (N, )
+
+        Returns:
+            Information entropy gain for a given splitting rule
+        """
+
+        information_entropy_left = 0
+        information_entropy_right = 0
+
+        [_, count] = np.unique(y_left, return_counts=True)
+        for i in count:
+            proportion = i/len(y_left)
+            information_entropy_left -= proportion * math.log2(proportion)
+
+        [_, count] = np.unique(y_right, return_counts=True)
+        for i in count:
+            proportion = i / len(y_right)
+            information_entropy_right -= proportion * math.log2(proportion)
+
+
+
+
+        information_entropy_left = - len(y_left)/len(y) * math.log2(len(y_left)/len(y))
+        information_entropy_right = - len(y_right)/len(y) * math.log2(len(y_right)/len(y))
+
+        return information_entropy_left + information_entropy_right
+
+
+
+
+
+
         
     
     def predict(self, x):
