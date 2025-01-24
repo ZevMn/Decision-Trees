@@ -24,6 +24,11 @@ class DecisionTreeClassifier(object):
 
     def __init__(self):
         self.is_trained = False
+        self. root = None
+        self.depth = 0
+        self.num_nodes = 0
+        self.num_leaves = 0
+        self.num_classes = 0
     
 
     def fit(self, x, y):
@@ -38,7 +43,7 @@ class DecisionTreeClassifier(object):
         """
         
         # Make sure that x and y have the same number of instances
-        assert x.shape[0] == len(ss5921@outlook.com), \
+        assert x.shape[0] == len(x), \
             "Training failed. x and y must have the same number of instances."
         
         #######################################################################
