@@ -29,6 +29,9 @@ class DecisionTreeClassifier(object):
         self.num_nodes = 0
         self.num_leaves = 0
         self.num_classes = 0
+
+        self.stop_splitting_at = 3
+        self.min_impurity_decrease = 0.0001
     
 
     def fit(self, x, y):
@@ -56,42 +59,52 @@ class DecisionTreeClassifier(object):
         self.is_trained = True
 
 
+    def entropy (self, set_of_labels):
+        entropy = 0
 
-    def calculate_new_information_entropy(self, y_left, y_right):
-        """ Calculates the entropy gain of the decision tree
-        for a given splitting rule.
-
-        Args:
-            y (numpy.ndarray): Class labels, numpy array of shape (N, )
-            y_left (numpy.ndarray): Class labels to the left of the split, numpy array of shape (N, )
-            y_right (numpy.ndarray): Class labels to the right of the split, numpy array of shape (N, )
-
-        Returns:
-            Information entropy gain for a given splitting rule
-        """
-
-        information_entropy_left = 0
-        information_entropy_right = 0
-
-        [_, count] = np.unique(y_left, return_counts=True)
+        [_, count] = np.unique(set_of_labels, return_counts=True)
         for i in count:
-            proportion = i/len(y_left)
-            information_entropy_left -= proportion * math.log2(proportion)
+            proportion = i / len(set_of_labels)
+            entropy -= proportion * math.log2(proportion)
 
-        [_, count] = np.unique(y_right, return_counts=True)
-        for i in count:
-            proportion = i / len(y_right)
-            information_entropy_right -= proportion * math.log2(proportion)
+        return entropy
 
 
+    def information_gain(self, y, y_left, y_right):
+
+        h_before = self.entropy(y_left)
+        h_after = self.entropy(y_right) + self.entropy(y_left)
+
+        return h_before - h_after
 
 
-        information_entropy_left = - len(y_left)/len(y) * math.log2(len(y_left)/len(y))
-        information_entropy_right = - len(y_right)/len(y) * math.log2(len(y_right)/len(y))
+    def best_split(self, x, y):
+        best_feature, best_threshold = None, None
+        best_gain = -1
 
-        return information_entropy_left + information_entropy_right
+        n_samples, n_features = x.shape
 
+        if n_samples < self.stop_splitting_at:
+            return None, None
 
+        for feature in range(n_features):
+            thresholds = np.unique(x[:, feature])
+
+            for threshold in thresholds:
+                left_mask = x[:, feature] <= threshold
+                right_mask = ~left_mask
+
+                if not np.any(left_mask) or not np.any(right_mask):
+                    continue
+
+                entropy_gain = self.information_gain(y, y[left_mask], y[right_mask])
+
+                if entropy_gain > best_gain and entropy_gain > self.min_impurity_decrease:
+                    best_gain = entropy_gain
+                    best_feature = feature
+                    best_threshold = threshold
+
+        return best_feature, best_threshold
 
 
 
