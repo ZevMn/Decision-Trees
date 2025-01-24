@@ -30,8 +30,10 @@ class DecisionTreeClassifier(object):
         self.num_leaves = 0
         self.num_classes = 0
 
-        self.stop_splitting_at = 3
+        # stopping criteria:
+        self.stop_splitting_at = 1
         self.min_impurity_decrease = 0.0001
+        self.max_depth = None
     
 
     def fit(self, x, y):
@@ -80,7 +82,7 @@ class DecisionTreeClassifier(object):
 
     def best_split(self, x, y):
         best_feature, best_threshold = None, None
-        best_gain = -1
+        best_gain = 0.0
 
         n_samples, n_features = x.shape
 
@@ -105,6 +107,19 @@ class DecisionTreeClassifier(object):
                     best_threshold = threshold
 
         return best_feature, best_threshold
+
+
+    def build_tree(self, x, y, depth=0):
+
+        # Stop if max depth is reached or labels are perfectly sorted
+        n_samples = len(y)
+        n_labels = len(np.unique(y))
+        if (self.max_depth is not None) and (depth <= self.max_depth) or n_labels == 1 or n_samples <= self.stop_splitting_at:
+            return np.argmax(np.bincount(y))
+
+
+
+
 
 
 
