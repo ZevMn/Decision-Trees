@@ -31,7 +31,7 @@ class DecisionTreeClassifier(object):
         self.num_classes = 0
 
         # stopping criteria:
-        self.stop_splitting_at = 1
+        self.min_elements_in_subset = 1
         self.min_impurity_decrease = 0.0001
         self.max_depth = None
     
@@ -61,37 +61,74 @@ class DecisionTreeClassifier(object):
         self.is_trained = True
 
 
-    def entropy (self, set_of_labels):
+    def entropy (self, labels):
+        """ Calculates the information entropy of a given dataset
+
+        Args:
+        labels (numpy.ndarray): Labels, numpy array of shape (N, )
+                                N is the number of instances
+
+        Returns:
+        The information entropy of the given dataset.
+        """
         entropy = 0
 
-        [_, count] = np.unique(set_of_labels, return_counts=True)
+        [_, count] = np.unique(labels, return_counts=True)
         for i in count:
-            proportion = i / len(set_of_labels)
+            proportion = i / len(labels)
             entropy -= proportion * math.log2(proportion)
 
         return entropy
 
 
     def information_gain(self, y, y_left, y_right):
+        """ Calculates the information gain of splitting a dataset into two given subsets
+
+        Args:
+        y (numpy.ndarray): Set of class labels, numpy array of shape (N, )
+        y_left (numpy.ndarray): Subset of class labels, numpy array of shape (N - i, )
+                                i is an integer from 0 to N - 1
+        y_right (numpy.ndarray): Subset of class labels, numpy array of shape (i, )
+
+        Returns:
+        The information gain of a given splitting.
+        """
+
+        len_before = len(y)
+        len_left = len(y_left)
+        len_right = len(y_right)
 
         h_before = self.entropy(y_left)
-        h_after = self.entropy(y_right) + self.entropy(y_left)
+        h_after = ((len_left / len_before) * self.entropy(y_left)) + ((len_right / len_before) * self.entropy(y_right))
 
         return h_before - h_after
 
 
     def best_split(self, x, y):
+        """ Determines the (binary) splitting for a given dataset which maximises information entropy gain
+
+        Args:
+        x (numpy.ndarray): Instances, numpy array of shape (N, K)
+        y (numpy.ndarray): Class labels, numpy array of shape (N, )
+
+        Returns:
+        The feature and threshold which represent the splitting with the greatest information entropy gain.
+        """
+
         best_feature, best_threshold = None, None
         best_gain = 0.0
 
         n_samples, n_features = x.shape
 
-        if n_samples < self.stop_splitting_at:
+        # Stop if splitting produces a subset of size less than predetermined minimum
+        if n_samples < self.min_elements_in_subset:
             return None, None
 
         for feature in range(n_features):
             thresholds = np.unique(x[:, feature])
 
+            # Loop through all possible thresholds for each feature
+            # NB: This is possible because features are discrete integers from 0 to 15
             for threshold in thresholds:
                 left_mask = x[:, feature] <= threshold
                 right_mask = ~left_mask
@@ -99,8 +136,10 @@ class DecisionTreeClassifier(object):
                 if not np.any(left_mask) or not np.any(right_mask):
                     continue
 
+                # Calculate the information entropy gain for each possible splitting
                 entropy_gain = self.information_gain(y, y[left_mask], y[right_mask])
 
+                # Keep track of the best splitting
                 if entropy_gain > best_gain and entropy_gain > self.min_impurity_decrease:
                     best_gain = entropy_gain
                     best_feature = feature
@@ -114,7 +153,7 @@ class DecisionTreeClassifier(object):
         # Stop if max depth is reached or labels are perfectly sorted
         n_samples = len(y)
         n_labels = len(np.unique(y))
-        if (self.max_depth is not None) and (depth <= self.max_depth) or n_labels == 1 or n_samples <= self.stop_splitting_at:
+        if (self.max_depth is not None) and (depth <= self.max_depth) or n_labels == 1 or n_samples <= self.min_elements_in_subset:
             return np.argmax(np.bincount(y))
 
 
