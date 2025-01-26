@@ -10,6 +10,18 @@
 import numpy as np
 import math as math
 
+from pyexpat import features
+
+
+class Node:
+    """ Represents a node in the decision tree """
+    def __init__(self, label=None, feature=None, threshold=None, left=None, right=None):
+        self.label = label            # Class label or None (if not terminal Node)
+        self.feature = feature        # Feature for splitting or None
+        self.threshold = threshold    # Threshold for splitting or None
+        self.left = left              # Point to another node or None
+        self.right = right            # Point to another node or None
+
 class DecisionTreeClassifier(object):
     """ Basic decision tree classifier
     
@@ -25,10 +37,11 @@ class DecisionTreeClassifier(object):
     def __init__(self):
         self.is_trained = False
         self. root = None
+
         self.depth = 0
         self.num_nodes = 0
         self.num_leaves = 0
-        self.num_classes = 0
+        self.num_classes = 0 # Is this necessary? ______________________________
 
         # stopping criteria:
         self.min_elements_in_subset = 1
@@ -53,12 +66,14 @@ class DecisionTreeClassifier(object):
         
         #######################################################################
         #                 ** TASK 2.1: COMPLETE THIS METHOD **
-        #######################################################################    
-        
+        #######################################################################
 
-        
+        self.root = self.build_tree(x, y)
+
         # set a flag so that we know that the classifier has been trained
-        self.is_trained = True
+        if self.root is not None:
+            self.num_nodes += 1
+            self.is_trained = True
 
 
     def entropy (self, labels):
@@ -153,16 +168,34 @@ class DecisionTreeClassifier(object):
         # Stop if max depth is reached or labels are perfectly sorted
         n_samples = len(y)
         n_labels = len(np.unique(y))
-        if (self.max_depth is not None) and (depth <= self.max_depth) or n_labels == 1 or n_samples <= self.min_elements_in_subset:
-            return np.argmax(np.bincount(y))
+        if (self.max_depth is not None and depth >= self.max_depth) or (n_labels == 1) or (n_samples <= self.min_elements_in_subset):
+            # Return a left node with the mode class as its label
+            return Node(label=np.argmax(np.bincount(y)))
 
+        # Determine next split
+        feature, threshold = self.best_split(x, y)
 
+        # Stop if no valid split is found
+        if feature is None or threshold is None:
+            return Node(label=np.argmax(np.bincount(y)))
 
+        # Split the current dataset in the left and right subsets
+        left_mask = x[:, feature] <= threshold
+        right_mask = ~left_mask
+        x_left, y_left = x[left_mask], y[left_mask]
+        x_right, y_right = x[right_mask], y[right_mask]
 
+        # Create the left and right subtrees recursively
+        left_subtree = self.build_tree(x[feature], y[feature], depth + 1)
+        right_subtree = self.build_tree(x[feature], y[feature], depth + 1)
 
+        self.depth = depth
+        self.num_nodes += 2
+        self.num_leaves += 2
 
-
-
+        # Return a node with the current split
+        # # NB: This line is called on all non-terminal nodes once a branch has terminated
+        return Node(feature=feature, threshold=threshold, left=left_subtree, right=right_subtree)
         
     
     def predict(self, x):
@@ -196,4 +229,12 @@ class DecisionTreeClassifier(object):
     
         # remember to change this if you rename the variable
         return predictions
+
+    def predict_sample(self, x, node):
+        # If a terminal node has been reached
+        if node.label is not None:
+            return node.label
+
+        # ADD MORE CODE HERE
+
         
