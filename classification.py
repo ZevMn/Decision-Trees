@@ -61,7 +61,7 @@ class DecisionTreeClassifier(object):
         """
         
         # Make sure that x and y have the same number of instances
-        assert x.shape[0] == len(x), \
+        assert x.shape[0] == len(y), \
             "Training failed. x and y must have the same number of instances."
         
         #######################################################################
@@ -113,7 +113,7 @@ class DecisionTreeClassifier(object):
         len_left = len(y_left)
         len_right = len(y_right)
 
-        h_before = self.entropy(y_left)
+        h_before = self.entropy(y)
         h_after = ((len_left / len_before) * self.entropy(y_left)) + ((len_right / len_before) * self.entropy(y_right))
 
         return h_before - h_after
@@ -186,8 +186,8 @@ class DecisionTreeClassifier(object):
         x_right, y_right = x[right_mask], y[right_mask]
 
         # Create the left and right subtrees recursively
-        left_subtree = self.build_tree(x[feature], y[feature], depth + 1)
-        right_subtree = self.build_tree(x[feature], y[feature], depth + 1)
+        left_subtree = self.build_tree(x_left, y_left, depth + 1)
+        right_subtree = self.build_tree(x_right, y_right, depth + 1)
 
         self.depth = depth
         self.num_nodes += 2
