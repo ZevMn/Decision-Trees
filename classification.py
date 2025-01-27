@@ -220,8 +220,10 @@ class DecisionTreeClassifier(object):
         # set up an empty (M, ) numpy array to store the predicted labels 
         # feel free to change this if needed
         predictions = np.zeros((x.shape[0],), dtype=object)
-        
-        
+
+        for i in range(len(x)):
+            predictions[i] = predict_sample(x[i])
+
         #######################################################################
         #                 ** TASK 2.2: COMPLETE THIS METHOD **
         #######################################################################
