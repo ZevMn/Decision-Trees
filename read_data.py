@@ -40,7 +40,7 @@ def read_dataset(filepath):
         print(f'{i} : {ratio*100:.2f}')
         ratio_list.append(ratio)
 
-    return x_attribute, y_mask, classes
+    return x_attribute, y, classes
 
 def display_barcharts(x1, y1, x2, y2, classes):
     ratio_list1 = []

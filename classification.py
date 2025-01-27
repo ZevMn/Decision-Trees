@@ -173,18 +173,20 @@ class DecisionTreeClassifier(object):
 
         if (self.max_depth is not None and depth >= self.max_depth) or (n_labels == 1) or (n_samples <= self.min_elements_in_subset):
             # Return a node with the mode class as its label
-            #unique_labels, y_int = np.unique(y, return_inverse=True)
-            #most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
-            #print(f"Creating leaf node at depth {depth} with label {most_common_label}")
-            #return Node(label=most_common_label)
-            return Node(label=np.argmax(np.bincount(y)))
+            unique_labels, y_int = np.unique(y, return_inverse=True)
+            most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
+            print(f"Creating leaf node at depth {depth} with label {most_common_label}")
+            return Node(label=most_common_label)
 
         # Determine next split
         feature, threshold = self.best_split(x, y)
 
         # Stop if no valid split is found
         if feature is None or threshold is None:
-            return Node(label=np.argmax(np.bincount(y)))
+            unique_labels, y_int = np.unique(y, return_inverse=True)
+            most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
+            return Node(label=most_common_label)
+            #return Node(label=np.argmax(np.bincount(y)))
 
         # Split the current dataset in the left and right subsets
         left_mask = x[:, feature] <= threshold
