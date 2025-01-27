@@ -169,13 +169,11 @@ class DecisionTreeClassifier(object):
         n_samples = len(y)
         n_labels = len(np.unique(y))
 
-        unique_labels, y_int = np.unique(y, return_inverse=True)
-
         if (self.max_depth is not None and depth >= self.max_depth) or (n_labels == 1) or (n_samples <= self.min_elements_in_subset):
             # Return a node with the mode class as its label
+            unique_labels, y_int = np.unique(y, return_inverse=True)
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
             return Node(label=most_common_label)
-            # return Node(label=np.argmax(np.bincount(y)))
 
         # Determine next split
         feature, threshold = self.best_split(x, y)
