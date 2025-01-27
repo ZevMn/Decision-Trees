@@ -36,12 +36,12 @@ class DecisionTreeClassifier(object):
 
     def __init__(self):
         self.is_trained = False
-        self. root = None
+        self.root = None
 
         self.depth = 0
         self.num_nodes = 0
         self.num_leaves = 0
-        self.num_classes = 0 # Is this necessary? ______________________________
+        self.num_classes = 1 # Is this necessary? ______________________________
 
         # stopping criteria:
         self.min_elements_in_subset = 1
@@ -131,7 +131,7 @@ class DecisionTreeClassifier(object):
         """
 
         best_feature, best_threshold = None, None
-        best_gain = 0.0
+        best_gain = -1.0
 
         n_samples, n_features = x.shape
 
@@ -194,9 +194,13 @@ class DecisionTreeClassifier(object):
         x_left, y_left = x[left_mask], y[left_mask]
         x_right, y_right = x[right_mask], y[right_mask]
 
+
         # Create the left and right subtrees recursively
         left_subtree = self.build_tree(x_left, y_left, depth + 1)
         right_subtree = self.build_tree(x_right, y_right, depth + 1)
+
+        # Create a new node with this split
+        node = Node(feature=feature, threshold=threshold, left=left_subtree, right=right_subtree)
 
         self.depth = depth
         self.num_nodes += 2
@@ -204,7 +208,8 @@ class DecisionTreeClassifier(object):
 
         # Return a node with the current split
         # # NB: This line is called on all non-terminal nodes once a branch has terminated
-        return Node(feature=feature, threshold=threshold, left=left_subtree, right=right_subtree)
+        #return Node(feature=feature, threshold=threshold, left=left_subtree, right=right_subtree)
+        return node
         
     
     def predict(self, x):
