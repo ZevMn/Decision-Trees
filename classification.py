@@ -221,15 +221,13 @@ class DecisionTreeClassifier(object):
         # feel free to change this if needed
         predictions = np.zeros((x.shape[0],), dtype=object)
 
-        for i in range(len(x)):
-            predictions[i] = predict_sample(x[i])
-
         #######################################################################
         #                 ** TASK 2.2: COMPLETE THIS METHOD **
         #######################################################################
-        
-    
-        # remember to change this if you rename the variable
+
+        for i in range(len(x)):
+            predictions[i] = self.predict_sample(x[i], self.root)
+
         return predictions
 
     def predict_sample(self, x, node):
@@ -237,6 +235,8 @@ class DecisionTreeClassifier(object):
         if node.label is not None:
             return node.label
 
-        # ADD MORE CODE HERE
-
-        
+        # Otherwise traverse to the left or right subtree based on the splitting condition
+        if x[node.feature] <= node.threshold:
+            return self.predict_sample(x, node.left)
+        else:
+            return self.predict_sample(x, node.right)
