@@ -10,6 +10,7 @@ from classification import DecisionTreeClassifier
 from improvement import train_and_predict
 from read_data import read_dataset, display_barcharts
 
+
 if __name__ == "__main__":
     print("Printing the full dataset info:")
     x_full, y_full, classes_full = read_dataset("data/train_full.txt")
@@ -20,15 +21,16 @@ if __name__ == "__main__":
 
     print("Loading the training dataset...");
     x = np.array([
-            [5,7,1],
-            [4,6,2],
-            [4,6,3],
-            [1,3,1],
-            [2,1,2],
-            [5,2,6]
-        ])
-
-    y = np.array(["A", "A", "A", "C", "C", "C"])
+        [5, 7, 1],
+        [4, 6, 2],
+        [4, 6, 3],
+        [1, 3, 1],
+        [2, 1, 2],
+        [5, 2, 6],
+        [6, 8, 4],
+        [3, 5, 3]
+    ])
+    y = np.array(["A", "A", "A", "C", "C", "C", "A", "C"])
 
     print("Training the decision tree...")
     classifier = DecisionTreeClassifier()
