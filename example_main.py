@@ -13,12 +13,11 @@ from read_data import read_dataset, display_barcharts
 if __name__ == "__main__":
     print("Printing the full dataset info:")
     x_full, y_full, classes_full = read_dataset("data/train_full.txt")
-    print("\nPrinting the subset dataset info:")
     x_sub, y_sub, classes_sub = read_dataset("data/train_sub.txt")
+    x_noisy, y_noisy, classes_noisy = read_dataset("data/train_noisy.txt")
+
     x_test, y_test, classes_test = read_dataset("data/test.txt")
     x_val, y_val, classes_val = read_dataset("data/validation.txt")
-
-
 
     display_barcharts(x_full, y_full, x_sub, y_sub, classes_full)
 
@@ -35,10 +34,16 @@ if __name__ == "__main__":
     # y = np.array(["A", "A", "A", "C", "C", "C"])
 
     print("Training the decision tree...")
-    classifier = DecisionTreeClassifier()
-    classifier.fit(x_full, y_full)
+    classifier_full = DecisionTreeClassifier()
+    classifier_full.fit(x_full, y_full)
 
-    print("Loading the test set...")
+    classifier_sub = DecisionTreeClassifier()
+    classifier_sub.fit(x_sub, y_sub)
+
+    classifier_noisy = DecisionTreeClassifier()
+    classifier_noisy.fit(x_noisy, y_noisy)
+
+    # print("Loading the test set...")
 
     # x_test = np.array([
     #             [1,6,3],
@@ -49,9 +54,18 @@ if __name__ == "__main__":
     #
     # y_test = np.array(["A", "A", "C", "C"])
 
-    print("Making predictions on the test set...")
-    predictions = classifier.predict(x_test)
-    print("Predictions: {}".format(predictions))
+    print("Making predictions on the test set for train_full...")
+    predictions_full = classifier_full.predict(x_test)
+    print("Predictions: {}".format(predictions_full))
+
+    print("Making predictions on the test set for train_sub...")
+    predictions_sub = classifier_sub.predict(x_test)
+    print("Predictions: {}".format(predictions_sub))
+
+    print("Making predictions on the test set for train_noisy...")
+    predictions_noisy = classifier_noisy.predict(x_test)
+    print("Predictions: {}".format(predictions_noisy))
+
 
     # x_val = np.array([
     #             [6,7,2],

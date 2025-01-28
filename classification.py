@@ -153,7 +153,7 @@ class DecisionTreeClassifier(object):
 
                 # Calculate the information entropy gain for each possible splitting
                 entropy_gain = self.information_gain(y, y[left_mask], y[right_mask])
-                print(f"Evaluating feature {feature}, threshold {threshold}, gain {entropy_gain}")
+                # print(f"Evaluating feature {feature}, threshold {threshold}, gain {entropy_gain}")
 
                 # Keep track of the best splitting
                 if entropy_gain > best_gain and entropy_gain > self.min_impurity_decrease:
@@ -161,7 +161,7 @@ class DecisionTreeClassifier(object):
                     best_feature = feature
                     best_threshold = threshold
 
-        print(f"Best gain found: {best_gain}")
+        # print(f"Best gain found: {best_gain}")
         return best_feature, best_threshold
 
 
@@ -175,7 +175,7 @@ class DecisionTreeClassifier(object):
             # Return a node with the mode class as its label
             unique_labels, y_int = np.unique(y, return_inverse=True)
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
-            print(f"Creating leaf node at depth {depth} with label {most_common_label}")
+            # print(f"Creating leaf node at depth {depth} with label {most_common_label}")
             return Node(label=most_common_label)
 
         # Determine next split
