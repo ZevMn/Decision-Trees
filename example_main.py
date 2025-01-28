@@ -14,48 +14,52 @@ if __name__ == "__main__":
     print("Printing the full dataset info:")
     x_full, y_full, classes_full = read_dataset("data/train_full.txt")
     print("\nPrinting the subset dataset info:")
-    x_sub, y_sub,classes_sub = read_dataset("data/train_noisy.txt")
+    x_sub, y_sub, classes_sub = read_dataset("data/train_sub.txt")
+    x_test, y_test, classes_test = read_dataset("data/test.txt")
+    x_val, y_val, classes_val = read_dataset("data/validation.txt")
+
+
 
     display_barcharts(x_full, y_full, x_sub, y_sub, classes_full)
 
-    print("Loading the training dataset...");
-    x = np.array([
-            [5,7,1],
-            [4,6,2],
-            [4,6,3],
-            [1,3,1],
-            [2,1,2],
-            [5,2,6]
-        ])
-
-    y = np.array(["A", "A", "A", "C", "C", "C"])
+    # print("Loading the training dataset...");
+    # x = np.array([
+    #         [5,7,1],
+    #         [4,6,2],
+    #         [4,6,3],
+    #         [1,3,1],
+    #         [2,1,2],
+    #         [5,2,6]
+    #     ])
+    #
+    # y = np.array(["A", "A", "A", "C", "C", "C"])
 
     print("Training the decision tree...")
     classifier = DecisionTreeClassifier()
-    classifier.fit(x, y)
+    classifier.fit(x_full, y_full)
 
     print("Loading the test set...")
 
-    x_test = np.array([
-                [1,6,3],
-                [0,5,5],
-                [1,5,0],
-                [2,4,2]
-            ])
-
-    y_test = np.array(["A", "A", "C", "C"])
+    # x_test = np.array([
+    #             [1,6,3],
+    #             [0,5,5],
+    #             [1,5,0],
+    #             [2,4,2]
+    #         ])
+    #
+    # y_test = np.array(["A", "A", "C", "C"])
 
     print("Making predictions on the test set...")
     predictions = classifier.predict(x_test)
     print("Predictions: {}".format(predictions))
 
-    x_val = np.array([
-                [6,7,2],
-                [3,1,3]
-            ])
-    y_val = np.array(["A", "C"])
+    # x_val = np.array([
+    #             [6,7,2],
+    #             [3,1,3]
+    #         ])
+    # y_val = np.array(["A", "C"])
 
-    print("Training the improved decision tree, and making predictions on the test set...")
-    predictions = train_and_predict(x, y, x_test, x_val, y_val)
-    print("Predictions: {}".format(predictions))
+    # print("Training the improved decision tree, and making predictions on the test set...")
+    # predictions = train_and_predict(x_full, y_full, x_test, x_val, y_val)
+    # print("Predictions: {}".format(predictions))
     
