@@ -3,10 +3,12 @@
 # Coursework 1 example execution code
 # Prepared by: Josiah Wang
 ##############################################################################
+from itertools import accumulate
 
 import numpy as np
 
 from classification import DecisionTreeClassifier
+from classification import Evaluation
 from improvement import train_and_predict
 from read_data import read_dataset, display_barcharts
 
@@ -76,4 +78,6 @@ if __name__ == "__main__":
     # print("Training the improved decision tree, and making predictions on the test set...")
     # predictions = train_and_predict(x_full, y_full, x_test, x_val, y_val)
     # print("Predictions: {}".format(predictions))
-    
+
+    evaluation = Evaluation()
+    print(evaluation.evaluate(predictions_full, y_test))
