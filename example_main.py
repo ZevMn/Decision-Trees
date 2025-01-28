@@ -81,3 +81,5 @@ if __name__ == "__main__":
 
     evaluation = Evaluation()
     print(evaluation.evaluate(predictions_full, y_test))
+    print(evaluation.evaluate(predictions_sub, y_test))
+    print(evaluation.evaluate(predictions_noisy, y_test))
