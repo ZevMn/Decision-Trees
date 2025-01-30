@@ -360,5 +360,9 @@ class Evaluation(object):
         precision = self.precision(y_gold, y_prediction)
         recall = self.recall(y_gold, y_prediction)
         f1_score = self.f1_score(y_gold, y_prediction)
-
+        print("Confusion: ", confusion)
+        print("Accuracy: " , accuracy)
+        print("Precision: ", precision)
+        print("Recall: ", recall)
+        print("F1 score: ", f1_score)
         return confusion, accuracy, precision, recall, f1_score

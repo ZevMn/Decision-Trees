@@ -56,17 +56,17 @@ if __name__ == "__main__":
     #
     # y_test = np.array(["A", "A", "C", "C"])
 
-    print("Making predictions on the test set for train_full...")
+    # print("Making predictions on the test set for train_full...")
     predictions_full = classifier_full.predict(x_test)
-    print("Predictions: {}".format(predictions_full))
+    # print("Predictions: {}".format(predictions_full))
 
-    print("Making predictions on the test set for train_sub...")
+    # print("Making predictions on the test set for train_sub...")
     predictions_sub = classifier_sub.predict(x_test)
-    print("Predictions: {}".format(predictions_sub))
+    # print("Predictions: {}".format(predictions_sub))
 
-    print("Making predictions on the test set for train_noisy...")
+    # print("Making predictions on the test set for train_noisy...")
     predictions_noisy = classifier_noisy.predict(x_test)
-    print("Predictions: {}".format(predictions_noisy))
+    # print("Predictions: {}".format(predictions_noisy))
 
 
     # x_val = np.array([
@@ -80,6 +80,10 @@ if __name__ == "__main__":
     # print("Predictions: {}".format(predictions))
 
     evaluation = Evaluation()
-    print(evaluation.evaluate(predictions_full, y_test))
-    print(evaluation.evaluate(predictions_sub, y_test))
-    print(evaluation.evaluate(predictions_noisy, y_test))
+    print("FULL SET: ")
+    evaluation.evaluate(predictions_full, y_test)
+    print("SUBSET: ")
+    evaluation.evaluate(predictions_sub, y_test)
+    print("NOISY: ")
+    evaluation.evaluate(predictions_noisy, y_test)
+
