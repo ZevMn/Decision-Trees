@@ -42,7 +42,8 @@ def read_dataset(filepath):
 
     return x_attribute, y, classes
 
-def display_barcharts(x1, y1, x2, y2, classes):
+
+def display_barcharts(y1, y2, classes, legend1, legend2):
     ratio_list1 = []
     ratio_list2 = []
 
@@ -65,8 +66,8 @@ def display_barcharts(x1, y1, x2, y2, classes):
     plt.title('Distribution of character appearances in datasets')
     plt.xticks(bar_positions, chart_labels)
     plt.legend(
-        handles=[plt.Line2D([0], [0], marker='o', color='w', label='Full dataset', markerfacecolor='blue', markersize=10),
-                 plt.Line2D([0], [0], marker='o', color='w', label='Subset dataset', markerfacecolor='green', markersize=10)])
+        handles=[plt.Line2D([0], [0], marker='o', color='w', label=legend1, markerfacecolor='blue', markersize=10),
+                 plt.Line2D([0], [0], marker='o', color='w', label=legend2, markerfacecolor='green', markersize=10)])
 
     plt.tight_layout()
     plt.show()
@@ -74,8 +75,27 @@ def display_barcharts(x1, y1, x2, y2, classes):
     return
 
 
-
 # # Add value labels on top of each bar
 # for i, (full_val, subset_val) in enumerate(zip(full_values, subset_values)):
 #     plt.text(x[i] - width/2, full_val, f'{full_val:.2f}', ha='center', va='bottom')
 #     plt.text(x[i] + width/2, subset_val, f'{subset_val:.2f}', ha='center', va='bottom')
+
+
+def different_labels(x_full, y_full, x_noisy, y_noisy, classes):
+
+    sorted_indices_full = np.lexsort(x_full.T)
+    sorted_indices_noisy = np.lexsort(x_noisy.T)
+
+    y_full_sorted = y_full[sorted_indices_full]
+    y_noisy_sorted = y_noisy[sorted_indices_noisy]
+
+    num_changed = np.sum(y_full_sorted != y_noisy_sorted)
+    total_labels = len(y_full_sorted)
+    proportion_changed = num_changed / total_labels
+
+    print(f"\nProportion of changed labels: {proportion_changed:.4f} ({num_changed} out of {total_labels})")
+
+    display_barcharts(y_full_sorted, y_noisy_sorted, classes, "Full dataset", "Noisy dataset")
+
+    return
+

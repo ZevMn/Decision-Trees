@@ -10,7 +10,7 @@ import numpy as np
 from classification import DecisionTreeClassifier
 from evaluation import Evaluation
 from improvement import train_and_predict
-from read_data import read_dataset, display_barcharts
+from read_data import read_dataset, display_barcharts, different_labels
 
 if __name__ == "__main__":
     print("Printing the full dataset info:")
@@ -21,7 +21,9 @@ if __name__ == "__main__":
     x_test, y_test, classes_test = read_dataset("data/test.txt")
     x_val, y_val, classes_val = read_dataset("data/validation.txt")
 
-    display_barcharts(x_full, y_full, x_sub, y_sub, classes_full)
+    display_barcharts(y_full, y_sub, classes_full, "Full dataset", "Subset dataset")
+
+    different_labels(x_full, y_full, x_noisy, y_noisy, classes_full)
 
     # print("Loading the training dataset...");
     # x = np.array([
