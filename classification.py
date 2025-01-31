@@ -9,6 +9,7 @@
 
 import numpy as np
 import math as math
+from numpy.random import default_rng
 
 from pyexpat import features
 
@@ -24,10 +25,10 @@ class Node:
 
 class DecisionTreeClassifier(object):
     """ Basic decision tree classifier
-    
+
     Attributes:
     is_trained (bool): Keeps track of whether the classifier has been trained
-    
+
     Methods:
     fit(x, y): Constructs a decision tree from data X and label y
     predict(x): Predicts the class label of samples X
@@ -47,23 +48,23 @@ class DecisionTreeClassifier(object):
         self.min_elements_in_subset = 1
         self.min_impurity_decrease = 0.0001
         self.max_depth = None
-    
+
 
     def fit(self, x, y):
         """ Constructs a decision tree classifier from data
-        
+
         Args:
-        x (numpy.ndarray): Instances, numpy array of shape (N, K) 
+        x (numpy.ndarray): Instances, numpy array of shape (N, K)
                            N is the number of instances
                            K is the number of attributes
         y (numpy.ndarray): Class labels, numpy array of shape (N, )
-                           Each element in y is a str 
+                           Each element in y is a str
         """
-        
+
         # Make sure that x and y have the same number of instances
         assert x.shape[0] == len(y), \
             "Training failed. x and y must have the same number of instances."
-        
+
         #######################################################################
         #                 ** TASK 2.1: COMPLETE THIS METHOD **
         #######################################################################
@@ -210,28 +211,28 @@ class DecisionTreeClassifier(object):
         # # NB: This line is called on all non-terminal nodes once a branch has terminated
         #return Node(feature=feature, threshold=threshold, left=left_subtree, right=right_subtree)
         return node
-        
-    
+
+
     def predict(self, x):
         """ Predicts a set of samples using the trained DecisionTreeClassifier.
-        
+
         Assumes that the DecisionTreeClassifier has already been trained.
-        
+
         Args:
-        x (numpy.ndarray): Instances, numpy array of shape (M, K) 
+        x (numpy.ndarray): Instances, numpy array of shape (M, K)
                            M is the number of test instances
                            K is the number of attributes
-        
+
         Returns:
         numpy.ndarray: A numpy array of shape (M, ) containing the predicted
                        class label for each instance in x
         """
-        
+
         # make sure that the classifier has been trained before predicting
         if not self.is_trained:
             raise Exception("DecisionTreeClassifier has not yet been trained.")
-        
-        # set up an empty (M, ) numpy array to store the predicted labels 
+
+        # set up an empty (M, ) numpy array to store the predicted labels
         # feel free to change this if needed
         predictions = np.zeros((x.shape[0],), dtype=object)
 
@@ -255,114 +256,22 @@ class DecisionTreeClassifier(object):
         else:
             return self.predict_sample(x, node.right)
 
-class Evaluation(object):
+    @staticmethod
+    def k_fold_split(n_instances, n_splits=10, random_generator=default_rng()):
+        """
+        Splits dataset indices into k folds using random shuffling.
 
-    def __init__(self):
-        pass
+        Args:
+        n_instances (int): Number of samples in the dataset.
+        n_splits (int): Number of folds (default: 10).
+        random_generator: Random generator instance for reproducibility.
 
-
-    def confusion_matrix(self, y_gold, y_prediction, class_labels=None):
-
-
-        # if no class_labels are given, we obtain the set of unique class labels from
-        # the union of the ground truth annotation and the prediction
-        if not class_labels:
-            class_labels = np.unique(np.concatenate((y_gold, y_prediction)))
-
-        confusion = np.zeros((len(class_labels), len(class_labels)))
-
-        # for each correct class (row),
-        # compute how many instances are predicted for each class (columns)
-        for (i, label) in enumerate(class_labels):
-            # get predictions where the ground truth is the current class label
-            indices = (y_gold == label)
-            gold = y_gold[indices]
-            predictions = y_prediction[indices]
-
-            # quick way to get the counts per label
-            (unique_labels, counts) = np.unique(predictions, return_counts=True)
-
-            # convert the counts to a dictionary
-            frequency_dict = dict(zip(unique_labels, counts))
-
-            # fill up the confusion matrix for the current row
-            for (j, class_label) in enumerate(class_labels):
-                confusion[i, j] = frequency_dict.get(class_label, 0)
-
-        return confusion
+        Returns:
+        list of numpy arrays: Each element is an array of indices for a fold.
+        """
+        shuffled_indices = random_generator.permutation(n_instances)  # Shuffle indices
+        split_indices = np.array_split(shuffled_indices, n_splits)  # Split into k folds
+        return split_indices
 
 
-    def accuracy(self, y_gold, y_prediction):
 
-        assert len(y_gold) == len(y_prediction)
-
-        try:
-            return np.sum(y_gold == y_prediction) / len(y_gold)
-        except ZeroDivisionError:
-            return 0.
-
-
-    def precision(self, y_gold, y_prediction):
-
-        confusion = self.confusion_matrix(y_gold, y_prediction)
-        p = np.zeros((len(confusion),))
-        for c in range(confusion.shape[0]):
-            if np.sum(confusion[:, c]) > 0:
-                p[c] = confusion[c, c] / np.sum(confusion[:, c])
-
-        # Compute the macro-averaged precision
-        macro_p = 0.
-        if len(p) > 0:
-            macro_p = np.mean(p)
-
-        return (p, macro_p)
-
-
-    def recall(self, y_gold, y_prediction):
-
-        confusion = self.confusion_matrix(y_gold, y_prediction)
-        r = np.zeros((len(confusion),))
-        for c in range(confusion.shape[0]):
-            if np.sum(confusion[c, :]) > 0:
-                r[c] = confusion[c, c] / np.sum(confusion[c, :])
-
-        # Compute the macro-averaged recall
-        macro_r = 0.
-        if len(r) > 0:
-            macro_r = np.mean(r)
-
-        return (r, macro_r)
-
-
-    def f1_score(self, y_gold, y_prediction):
-
-        (precisions, macro_p) = self.precision(y_gold, y_prediction)
-        (recalls, macro_r) = self.recall(y_gold, y_prediction)
-
-        # just to make sure they are of the same length
-        assert len(precisions) == len(recalls)
-
-        f = np.zeros((len(precisions),))
-        for c, (p, r) in enumerate(zip(precisions, recalls)):
-            if p + r > 0:
-                f[c] = 2 * p * r / (p + r)
-
-        # Compute the macro-averaged F1
-        macro_f = 0.
-        if len(f) > 0:
-            macro_f = np.mean(f)
-
-        return (f, macro_f)
-
-    def evaluate(self, y_gold, y_prediction):
-        confusion = self.confusion_matrix(y_gold, y_prediction)
-        accuracy = self.accuracy(y_gold, y_prediction)
-        precision = self.precision(y_gold, y_prediction)
-        recall = self.recall(y_gold, y_prediction)
-        f1_score = self.f1_score(y_gold, y_prediction)
-        print("Confusion: ", confusion)
-        print("Accuracy: " , accuracy)
-        print("Precision: ", precision)
-        print("Recall: ", recall)
-        print("F1 score: ", f1_score)
-        return confusion, accuracy, precision, recall, f1_score

@@ -8,7 +8,7 @@ from itertools import accumulate
 import numpy as np
 
 from classification import DecisionTreeClassifier
-from classification import Evaluation
+from evaluation import Evaluation
 from improvement import train_and_predict
 from read_data import read_dataset, display_barcharts
 
@@ -87,3 +87,6 @@ if __name__ == "__main__":
     print("NOISY: ")
     evaluation.evaluate(predictions_noisy, y_test)
 
+    DecisionTreeClassifier = DecisionTreeClassifier()
+    k_folds = DecisionTreeClassifier.k_fold_split(len(y_test), n_splits=10)
+    print("K-Folds: ", k_folds)
