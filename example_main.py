@@ -21,7 +21,7 @@ if __name__ == "__main__":
     x_test, y_test, classes_test = read_dataset("data/test.txt")
     x_val, y_val, classes_val = read_dataset("data/validation.txt")
 
-    display_barcharts(y_full, y_sub, classes_full, "Full dataset", "Subset dataset")
+    display_barcharts(y_full, y_sub, classes_full, "train_full.txt", "train_sub.txt")
 
     different_labels(x_full, y_full, x_noisy, y_noisy, classes_full)
 

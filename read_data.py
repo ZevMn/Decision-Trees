@@ -2,6 +2,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.random import default_rng
 
+import matplotlib.pylab as pylab
+params = {'legend.fontsize': 'medium',
+          'figure.figsize': (15, 5),
+         'axes.labelsize': 'large',
+         'axes.titlesize':'x-large',
+         'xtick.labelsize':'medium',
+         'ytick.labelsize':'medium'}
+pylab.rcParams.update(params)
+
 def read_dataset(filepath):
     """ Read in the dataset from the specified filepath
 
@@ -61,9 +70,14 @@ def display_barcharts(y1, y2, classes, legend1, legend2):
     plt.bar(bar_positions + width / 2, ratio_list1, width, label=chart_labels, color='blue', alpha=0.7, )
     plt.bar(bar_positions - width / 2, ratio_list2, width, label=chart_labels, color='green', alpha=0.7)
 
-    plt.xlabel('Characters')
-    plt.ylabel('Ratios')
-    plt.title('Distribution of character appearances in datasets')
+    print("Standard deviation: ", np.std(ratio_list1))
+    print("Range: ", np.max(ratio_list1) - np.min(ratio_list1))
+    print("Standard deviation: ", np.std(ratio_list2))
+    print("Range: ", np.max(ratio_list2) - np.min(ratio_list2))
+
+    plt.xlabel('Characters represented in the datasets')
+    plt.ylabel('Proportion of class instances in a given dataset')
+    plt.title("Frequency distribution of class instances in datasets 'train_full.txt' and 'train_sub.txt'")
     plt.xticks(bar_positions, chart_labels)
     plt.legend(
         handles=[plt.Line2D([0], [0], marker='o', color='w', label=legend1, markerfacecolor='blue', markersize=10),
@@ -95,7 +109,7 @@ def different_labels(x_full, y_full, x_noisy, y_noisy, classes):
 
     print(f"\nProportion of changed labels: {proportion_changed:.4f} ({num_changed} out of {total_labels})")
 
-    display_barcharts(y_full_sorted, y_noisy_sorted, classes, "Full dataset", "Noisy dataset")
+    display_barcharts(y_full_sorted, y_noisy_sorted, classes, "train_full.txt", "train_noisy.txt")
 
     return
 
