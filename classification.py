@@ -42,9 +42,8 @@ class DecisionTreeClassifier(object):
         self.depth = 0
         self.num_nodes = 0
         self.num_leaves = 0
-        self.num_classes = 1 # Is this necessary? ______________________________
 
-        # stopping criteria:
+        # Splitting parameters:
         self.min_elements_in_subset = 1
         self.min_impurity_decrease = 0.0001
         self.max_depth = None
@@ -77,7 +76,7 @@ class DecisionTreeClassifier(object):
             self.is_trained = True
 
 
-    def entropy (self, labels):
+    def entropy(self, labels):
         """ Calculates the information entropy of a given dataset
 
         Args:
