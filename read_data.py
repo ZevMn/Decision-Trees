@@ -55,10 +55,16 @@ def read_dataset(filepath):
 def display_barcharts(y1, y2, classes, legend1, legend2):
     ratio_list1 = []
     ratio_list2 = []
+    counts1 = []
+    counts2 = []
 
     for i in classes:
-        ratio1 = np.count_nonzero(y1 == i) / len(y1)
-        ratio2 = np.count_nonzero(y2 == i) / len(y2)
+        count1 = np.count_nonzero(y1 == i)
+        counts1.append(count1)
+        ratio1 = count1 / len(y1)
+        count2 = np.count_nonzero(y2 == i)
+        counts2.append(count2)
+        ratio2 = count2 / len(y2)
         ratio_list1.append(ratio1)
         ratio_list2.append(ratio2)
 
@@ -75,13 +81,19 @@ def display_barcharts(y1, y2, classes, legend1, legend2):
     print("Standard deviation: ", np.std(ratio_list2))
     print("Range: ", np.max(ratio_list2) - np.min(ratio_list2))
 
+    for bar, count in zip(bar_positions, counts1):
+        plt.text(bar + (width / 2), count/sum(counts1) - 0.01, str(count), ha='center', va='bottom', fontsize=10, color='white')
+    for bar, count in zip(bar_positions, counts2):
+        plt.text(bar - (width / 2), count/sum(counts2) - 0.01, str(count), ha='center', va='bottom', fontsize=10, color='white')
+
+
     plt.xlabel('Characters represented in the datasets')
     plt.ylabel('Proportion of class instances in a given dataset')
     plt.title("Frequency distribution of class instances in datasets 'train_full.txt' and 'train_sub.txt'")
     plt.xticks(bar_positions, chart_labels)
     plt.legend(
         handles=[plt.Line2D([0], [0], marker='o', color='w', label=legend1, markerfacecolor='blue', markersize=10),
-                 plt.Line2D([0], [0], marker='o', color='w', label=legend2, markerfacecolor='green', markersize=10)])
+                 plt.Line2D([0], [0], marker='o', color='w', label=legend2, markerfacecolor='green', markersize=10)], loc='upper left', bbox_to_anchor=(1,1))
 
     plt.tight_layout()
     plt.show()

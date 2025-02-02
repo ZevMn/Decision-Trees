@@ -17,11 +17,11 @@ from pyexpat import features
 class Node:
     """ Represents a node in the decision tree """
     def __init__(self, label=None, feature=None, threshold=None, left=None, right=None):
-        self.label = label            # Class label or None (if not terminal Node)
-        self.feature = feature        # Feature for splitting or None
-        self.threshold = threshold    # Threshold for splitting or None
-        self.left = left              # Point to another node or None
-        self.right = right            # Point to another node or None
+        self.label = label            # Class label or None if not terminal Node
+        self.feature = feature        # Feature for splitting or None if terminal Node
+        self.threshold = threshold    # Threshold for splitting or None if terminal Node
+        self.left = left              # Point to another node or None if terminal Node
+        self.right = right            # Point to another node or None if terminal Node
 
 class DecisionTreeClassifier(object):
     """ Basic decision tree classifier
