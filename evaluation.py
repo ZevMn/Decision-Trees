@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from numpy.random import default_rng
+
+from classification import DecisionTreeClassifier
+
 
 class Evaluation(object):
 
@@ -219,3 +223,4 @@ class Evaluation(object):
         self.plot_metrics(y_gold, y_prediction, class_labels)
 
         return confusion, accuracy, precision, recall, f1_score
+

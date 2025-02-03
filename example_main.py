@@ -6,11 +6,11 @@
 from itertools import accumulate
 
 import numpy as np
-
 from classification import DecisionTreeClassifier
 from evaluation import Evaluation
 from improvement import train_and_predict
 from read_data import read_dataset, display_barcharts, different_labels
+from kfold import kfold
 
 if __name__ == "__main__":
     print("Printing the full dataset info:")
@@ -22,20 +22,7 @@ if __name__ == "__main__":
     x_val, y_val, classes_val = read_dataset("data/validation.txt")
 
     display_barcharts(y_full, y_sub, classes_full, "train_full.txt", "train_sub.txt")
-
     different_labels(x_full, y_full, x_noisy, y_noisy, classes_full)
-
-    # print("Loading the training dataset...");
-    # x = np.array([
-    #         [5,7,1],
-    #         [4,6,2],
-    #         [4,6,3],
-    #         [1,3,1],
-    #         [2,1,2],
-    #         [5,2,6]
-    #     ])
-    #
-    # y = np.array(["A", "A", "A", "C", "C", "C"])
 
     print("Training the decision tree...")
     classifier_full = DecisionTreeClassifier()
@@ -47,48 +34,48 @@ if __name__ == "__main__":
     classifier_noisy = DecisionTreeClassifier()
     classifier_noisy.fit(x_noisy, y_noisy)
 
-    # print("Loading the test set...")
-
-    # x_test = np.array([
-    #             [1,6,3],
-    #             [0,5,5],
-    #             [1,5,0],
-    #             [2,4,2]
-    #         ])
-    #
-    # y_test = np.array(["A", "A", "C", "C"])
-
-    # print("Making predictions on the test set for train_full...")
+    print("Making predictions on the test set...")
     predictions_full = classifier_full.predict(x_test)
-    # print("Predictions: {}".format(predictions_full))
-
-    # print("Making predictions on the test set for train_sub...")
     predictions_sub = classifier_sub.predict(x_test)
-    # print("Predictions: {}".format(predictions_sub))
-
-    # print("Making predictions on the test set for train_noisy...")
     predictions_noisy = classifier_noisy.predict(x_test)
-    # print("Predictions: {}".format(predictions_noisy))
-
-
-    # x_val = np.array([
-    #             [6,7,2],
-    #             [3,1,3]
-    #         ])
-    # y_val = np.array(["A", "C"])
-
-    # print("Training the improved decision tree, and making predictions on the test set...")
-    # predictions = train_and_predict(x_full, y_full, x_test, x_val, y_val)
-    # print("Predictions: {}".format(predictions))
 
     evaluation = Evaluation()
-    print("FULL SET: ")
-    evaluation.evaluate(predictions_full, y_test)
-    print("SUBSET: ")
-    evaluation.evaluate(predictions_sub, y_test)
-    print("NOISY: ")
-    evaluation.evaluate(predictions_noisy, y_test)
 
-    DecisionTreeClassifier = DecisionTreeClassifier()
-    k_folds = DecisionTreeClassifier.k_fold_split(len(y_test), n_splits=10)
-    print("K-Folds: ", k_folds)
+    print("FULL SET: ")
+    evaluation.evaluate(y_test, predictions_full)
+    print("SUBSET: ")
+    evaluation.evaluate(y_test, predictions_sub)
+    print("NOISY: ")
+    evaluation.evaluate(y_test, predictions_noisy)
+
+    # K-Fold Cross-Validation
+    kfold_validator = kfold()
+
+    print("\nPerforming k-fold cross-validation on full dataset:")
+    avg_acc_full, std_dev_full = kfold_validator.k_fold_evaluation(classifier_full, x_full, y_full, n_folds=10)
+    print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
+
+    print("\nPerforming k-fold cross-validation on subset dataset:")
+    avg_acc_sub, std_dev_sub = kfold_validator.k_fold_evaluation(classifier_sub, x_sub, y_sub, n_folds=10)
+    print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
+
+    print("\nPerforming k-fold cross-validation on noisy dataset:")
+    avg_acc_noisy, std_dev_noisy = kfold_validator.k_fold_evaluation(classifier_noisy, x_noisy, y_noisy, n_folds=10)
+    print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
+
+    print("Performing majority voting on test set...")
+    fold_predictions = []
+
+    # 🔥 FIXED: Now creating a new DecisionTreeClassifier instance inside the loop
+    for train_indices, val_indices, test_indices in kfold_validator.train_val_test_k_fold(10, len(x_full)):
+        classifier = DecisionTreeClassifier()  # Create new instance for each fold
+        classifier.fit(x_full[train_indices], y_full[train_indices])
+        fold_predictions.append(classifier.predict(x_test))
+
+    fold_predictions = np.array(fold_predictions)
+
+    # Compute majority vote
+    final_predictions = kfold_validator.majority_vote(fold_predictions)
+
+    print("Evaluating ensemble model...")
+    evaluation.evaluate(y_test, final_predictions)

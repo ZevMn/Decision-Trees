@@ -255,22 +255,6 @@ class DecisionTreeClassifier(object):
         else:
             return self.predict_sample(x, node.right)
 
-    @staticmethod
-    def k_fold_split(n_instances, n_splits=10, random_generator=default_rng()):
-        """
-        Splits dataset indices into k folds using random shuffling.
-
-        Args:
-        n_instances (int): Number of samples in the dataset.
-        n_splits (int): Number of folds (default: 10).
-        random_generator: Random generator instance for reproducibility.
-
-        Returns:
-        list of numpy arrays: Each element is an array of indices for a fold.
-        """
-        shuffled_indices = random_generator.permutation(n_instances)  # Shuffle indices
-        split_indices = np.array_split(shuffled_indices, n_splits)  # Split into k folds
-        return split_indices
 
 
 
