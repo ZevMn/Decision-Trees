@@ -6,23 +6,24 @@ class kfold(object):
         pass
 
 
-    def k_fold_split(self,n_instances, n_splits=10, random_generator=np.random.default_rng()):
+    def k_fold_split(self,n_instances, n_folds=10, random_generator=np.random.default_rng()):
         """
         Splits dataset indices into k folds using random shuffling.
 
         Args:
             n_instances (int): Number of samples in the dataset.
-            n_splits (int): Number of folds (default: 10).
+            n_folds (int): Number of folds (default: 10).
             random_generator: Random generator instance for reproducibility.
 
         Returns:
             list: Each element is a numpy array containing the indices of the instances in that fold.
         """
         shuffled_indices = random_generator.permutation(n_instances)  # Generate a random permutation of indices
-        split_indices = np.array_split(shuffled_indices, n_splits)  # Split into k folds
+        split_indices = np.array_split(shuffled_indices, n_folds)  # Split shuffled indices into k folds
+
         return split_indices
 
-    def train_val_test_k_fold(self, n_folds, n_instances, random_generator=np.random.default_rng()):
+    def train_test_k_fold(self, n_instances, n_folds=10, random_generator=np.random.default_rng()):
         """ Generate train, validation, and test indices for k-fold.
 
         Args:
@@ -32,8 +33,11 @@ class kfold(object):
 
         Returns:
             list: a list of length n_folds. Each element in the list is a tuple
-                with three elements: train indices, validation indices, and test indices.
+                with two elements: a numpy array containing the train indices
+                and a numpy array containing the test indices.
         """
+
+        # Split the dataset into k splits
         split_indices = self.k_fold_split(n_instances, n_folds, random_generator)
 
         folds = []
