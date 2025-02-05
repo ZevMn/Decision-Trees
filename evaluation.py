@@ -155,7 +155,7 @@ class Evaluation(object):
         plt.ylabel("Actual")
         plt.show()
 
-    def plot_metrics(self, y_gold, y_prediction, class_labels=None):
+    def plot_metrics(self, y_gold, y_prediction, class_labels=None, title="Precision, Recall, and F1 Score per Class"):
         """
         Plot precision, recall, and F1 score for each class.
 
@@ -163,6 +163,7 @@ class Evaluation(object):
             y_gold (np.array): Ground truth labels.
             y_prediction (np.array): Predicted labels.
             class_labels (np.array, optional): List of class labels. If None, inferred from y_gold and y_prediction.
+            title (str, optional): Title of the plot.
         """
         if class_labels is None:
             class_labels = np.unique(np.concatenate((y_gold, y_prediction)))
@@ -183,20 +184,21 @@ class Evaluation(object):
         for metric_name, values in metrics.items():
             plt.plot(class_labels, values, marker='o', label=metric_name)
 
-        plt.title("Precision, Recall, and F1 Score per Class")
+        plt.title(f"Evaluation metrics for {title}")
         plt.xlabel("Class Labels")
         plt.ylabel("Score")
         plt.legend()
         plt.grid()
         plt.show()
 
-    def evaluate(self, y_gold, y_prediction, class_labels=None):
+    def evaluate(self, y_gold, y_prediction, title, class_labels=None):
         """
         Evaluate the model and print/plot metrics.
 
         Args:
             y_gold (np.array): Ground truth labels.
             y_prediction (np.array): Predicted labels.
+            title: Title of the plot.
             class_labels (np.array, optional): List of class labels. If None, inferred from y_gold and y_prediction.
 
         Returns:
@@ -218,9 +220,12 @@ class Evaluation(object):
         print("Recall: ", recall)
         print("F1 Score: ", f1_score)
 
+
+
+
         # Plot confusion matrix and metrics
         self.plot_confusion_matrix(confusion, class_labels)
-        self.plot_metrics(y_gold, y_prediction, class_labels)
+        self.plot_metrics(y_gold, y_prediction, class_labels, title)
 
         return confusion, accuracy, precision, recall, f1_score
 

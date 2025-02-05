@@ -9,6 +9,8 @@
 
 import numpy as np
 
+from classification import DecisionTreeClassifier
+
 
 def train_and_predict(x_train, y_train, x_test, x_val, y_val):
     """ Interface to train and test the new/improved decision tree.
@@ -45,14 +47,72 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val):
        
 
     # TODO: Train new classifier
-
+    best_params = grid_search(x_train, y_train, x_test, x_val, y_val);
     # set up an empty (M, ) numpy array to store the predicted labels 
     # feel free to change this if needed
+    improved_tree = DecisionTreeClassifier(max_depth = best_params["max_depth"], min_samples_split = best_params["min_samples_split"])
+    improved_tree.fit(x_train, y_train)
+
     predictions = np.zeros((x_test.shape[0],), dtype=object)
         
     # TODO: Make predictions on x_test using new classifier        
         
     # remember to change this if you rename the variable
     return predictions
+
+def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
+    """ Generate train and test indices at each fold.
+
+        Args:
+            n_folds (int): Number of folds
+            n_instances (int): Total number of instances
+            random_generator (np.random.Generator): A random generator
+
+        Returns:
+            list: a list of length n_folds. Each element in the list is a list (or tuple)
+                with three elements:
+                - a numpy array containing the train indices
+                - a numpy array containing the val indices
+                - a numpy array containing the test indices
+        """
+
+    return
+
+def optimise_parameters():
+    for max_depth in [None, 1, 5, 10]:
+        # Call grid search
+        # Call comp_accuracy to find best max_depth
+        pass
+    for min_elements_in_subset in range(10):
+        # Call grid search with max_depth set to the above
+        # Call comp_accuracy to find best min_elements_in_subset
+        pass
+    for min_impurity_decrease in np.arange(0, 1, 0.1):
+        # Call grid search with max_depth and min_elements_in_subset set to the above
+        # Call comp_accuracy to find best min_impurity_decrease
+        pass
+    return
+
+def comp_accuracy():
+    return;
+
+def grid_search(x_train, y_train, x_test, x_val, y_val):
+    # for i, (train_indices, val_indices, test_indices) in enumerate(train_val_test_k_fold(n_folds, len(x), rg)):
+    #     # set up the dataset for this fold
+    #     x_train = x[train_indices, :]
+    #     y_train = y[train_indices]
+    #     x_val = x[val_indices, :]
+    #     y_val = y[val_indices]
+    #     x_test = x[test_indices, :]
+    #     y_test = y[test_indices]
+
+    # Iterate through depth
+    # For each fold, call predict on training split
+    # and evaluate accuracy using validation split
+    # Append accuracy to an empty list
+    # After evaluating all folds, return depth that gave the best accuracy
+    # Now using this depth, repeat for min_sample_size
+    # Now using that depth and min_sample_size, repeat for min_entropy_gain
+    return
 
 

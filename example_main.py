@@ -8,7 +8,7 @@ from itertools import accumulate
 import numpy as np
 from classification import DecisionTreeClassifier
 from evaluation import Evaluation
-from improvement import train_and_predict
+#from improvement import train_and_predict
 from read_data import read_dataset, display_barcharts, different_labels
 from kfold import kfold
 
@@ -42,11 +42,11 @@ if __name__ == "__main__":
     evaluation = Evaluation()
 
     print("FULL SET: ")
-    evaluation.evaluate(y_test, predictions_full)
+    evaluation.evaluate(y_test, predictions_full, "train_full.txt")
     print("SUBSET: ")
-    evaluation.evaluate(y_test, predictions_sub)
+    evaluation.evaluate(y_test, predictions_sub, "train_sub.txt")
     print("NOISY: ")
-    evaluation.evaluate(y_test, predictions_noisy)
+    evaluation.evaluate(y_test, predictions_noisy, "train_noisy.txt")
 
     # K-Fold Cross-Validation
     kfold_validator = kfold()
@@ -66,7 +66,6 @@ if __name__ == "__main__":
     print("Performing majority voting on test set...")
     fold_predictions = []
 
-    # 🔥 FIXED: Now creating a new DecisionTreeClassifier instance inside the loop
     for train_indices, val_indices, test_indices in kfold_validator.train_val_test_k_fold(10, len(x_full)):
         classifier = DecisionTreeClassifier()  # Create new instance for each fold
         classifier.fit(x_full[train_indices], y_full[train_indices])
@@ -78,4 +77,4 @@ if __name__ == "__main__":
     final_predictions = kfold_validator.majority_vote(fold_predictions)
 
     print("Evaluating ensemble model...")
-    evaluation.evaluate(y_test, final_predictions)
+    evaluation.evaluate(y_test, final_predictions, "K-fold")

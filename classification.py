@@ -49,7 +49,7 @@ class DecisionTreeClassifier(object):
         self.max_depth = None
 
 
-    def fit(self, x, y):
+    def fit(self, x, y, min_elements_in_subset=1, min_impurity_decrease=0.0001, max_depth=None):
         """ Constructs a decision tree classifier from data
 
         Args:
@@ -59,6 +59,10 @@ class DecisionTreeClassifier(object):
         y (numpy.ndarray): Class labels, numpy array of shape (N, )
                            Each element in y is a str
         """
+
+        self.min_elements_in_subset = min_elements_in_subset
+        self.min_impurity_decrease = min_impurity_decrease
+        self.max_depth = max_depth
 
         # Make sure that x and y have the same number of instances
         assert x.shape[0] == len(y), \
