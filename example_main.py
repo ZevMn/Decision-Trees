@@ -108,13 +108,24 @@ if __name__ == "__main__":
     avg_acc_full, std_dev_full = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
 
-    print("\nPerforming k-fold cross-validation on subset dataset:")
-    avg_acc_sub, std_dev_sub = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
-    print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
+    '''Performing 10-fold cross-validation on the subset and noisy datasets:'''
+    # print("\nPerforming k-fold cross-validation on subset dataset:")
+    # avg_acc_sub, std_dev_sub = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
+    # print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
+    #
+    # print("\nPerforming k-fold cross-validation on noisy dataset:")
+    # avg_acc_noisy, std_dev_noisy = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
+    # print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
 
-    print("\nPerforming k-fold cross-validation on noisy dataset:")
-    avg_acc_noisy, std_dev_noisy = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
-    print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
+    """
+        *******************************************
+                        PART 3.3
+        *******************************************
+    """
+
+    print("\n--------------------------------------------------------")
+    print("PART 3.2: COMBINING THE PREDICTIONS USING MAJORITY VOTING")
+    print("---------------------------------------------------------")
 
     print("Performing majority voting on test set...")
     fold_predictions = []
@@ -125,12 +136,6 @@ if __name__ == "__main__":
     #     fold_predictions.append(classifier.predict(x_test))
     #
     # fold_predictions = np.array(fold_predictions)
-
-    """
-        *******************************************
-                        PART 3.3
-        *******************************************
-    """
 
     # # Compute majority vote
     # final_predictions = kfold_validator.majority_vote(fold_predictions)
