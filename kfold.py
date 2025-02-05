@@ -37,21 +37,20 @@ class kfold(object):
                 and a numpy array containing the test indices.
         """
 
-        # Split the dataset into k splits
+        # Split the dataset into k splits of indices
         split_indices = self.k_fold_split(n_instances, n_folds, random_generator)
 
         folds = []
+        # Iterate through the folds each time selecting one as the test set and the rest for training
         for k in range(n_folds):
+            # Select the current fold to be the test set
             test_indices = split_indices[k]
 
-            # Use first remaining split as validation set
-            remaining_splits = [split_indices[j] for j in range(n_folds) if j != k]
-            val_indices = remaining_splits[0]  # Select first split as validation set
+            # Combine all other folds for training
+            # NB: np.hstack() horizontally stacks (concatenates) arrays
+            train_indices = np.hstack(split_indices[:k] + split_indices[k + 1:])
 
-            # Remaining data as training set
-            train_indices = np.hstack(remaining_splits[1:])  # Exclude val and test indices
-
-            folds.append((train_indices, val_indices, test_indices))
+            folds.append([train_indices, test_indices])
 
         return folds
 
