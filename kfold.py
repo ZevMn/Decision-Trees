@@ -11,14 +11,14 @@ class kfold(object):
         Splits dataset indices into k folds using random shuffling.
 
         Args:
-        n_instances (int): Number of samples in the dataset.
-        n_splits (int): Number of folds (default: 10).
-        random_generator: Random generator instance for reproducibility.
+            n_instances (int): Number of samples in the dataset.
+            n_splits (int): Number of folds (default: 10).
+            random_generator: Random generator instance for reproducibility.
 
         Returns:
-        list of numpy arrays: Each element is an array of indices for a fold.
+            list: Each element is a numpy array containing the indices of the instances in that fold.
         """
-        shuffled_indices = random_generator.permutation(n_instances)  # Shuffle indices
+        shuffled_indices = random_generator.permutation(n_instances)  # Generate a random permutation of indices
         split_indices = np.array_split(shuffled_indices, n_splits)  # Split into k folds
         return split_indices
 
