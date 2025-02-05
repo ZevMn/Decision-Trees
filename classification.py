@@ -180,6 +180,7 @@ class DecisionTreeClassifier(object):
             unique_labels, y_int = np.unique(y, return_inverse=True)
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
             # print(f"Creating leaf node at depth {depth} with label {most_common_label}")
+            self.num_leaves += 1
             return Node(label=most_common_label)
 
         # Determine next split
@@ -189,6 +190,7 @@ class DecisionTreeClassifier(object):
         if feature is None or threshold is None:
             unique_labels, y_int = np.unique(y, return_inverse=True)
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
+            self.num_leaves += 1
             return Node(label=most_common_label)
             #return Node(label=np.argmax(np.bincount(y)))
 
@@ -208,11 +210,9 @@ class DecisionTreeClassifier(object):
 
         self.depth = depth
         self.num_nodes += 2
-        self.num_leaves += 2
 
         # Return a node with the current split
-        # # NB: This line is called on all non-terminal nodes once a branch has terminated
-        #return Node(feature=feature, threshold=threshold, left=left_subtree, right=right_subtree)
+        # # NB: This line is called on all non-terminal nodes up the stack frame once a branch has terminated
         return node
 
 
