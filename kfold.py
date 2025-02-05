@@ -58,6 +58,7 @@ class kfold(object):
 
     def k_fold_train_and_evaluation(self, x, y, n_folds=10):
         accuracies = np.zeros((n_folds,))
+        trees = []
 
         rg = np.random.default_rng()
         folds = self.train_test_k_fold(len(x), n_folds, rg)
@@ -72,23 +73,40 @@ class kfold(object):
             # Train the decision tree
             tree = DecisionTreeClassifier()
             tree.fit(x_train, y_train)
+            trees.append(tree)
 
             # Test it
             predictions = tree.predict(x_test)
             accuracy = np.mean(predictions == y_test)
-
             accuracies[i] = accuracy  # Store test accuracy
 
         print("Accuracies per fold:", accuracies)
         print("Average Accuracy:", accuracies.mean())
         print("Standard Deviation:", accuracies.std())
 
-        return accuracies.mean(), accuracies.std()
+        return accuracies.mean(), accuracies.std(), trees
 
-    # def majority_vote(self, predictions):
-    #     n_samples = predictions.shape[1]
-    #     final_predictions = np.empty(n_samples, dtype=predictions.dtype)
-    #     for i in range(n_samples):
-    #         unique_labels, counts = np.unique(predictions[:, i], return_counts=True)
-    #         final_predictions[i] = unique_labels[np.argmax(counts)]
-    #     return final_predictions
+    def majority_vote(self, predictions):
+        """
+        Combines predictions from multiple models using majority voting.
+
+        Args:
+            predictions (numpy.ndarray): Array of shape (n_models, n_samples) containing
+                                       predictions from multiple models
+
+        Returns:
+            numpy.ndarray: Array of length n_samples containing the majority vote predictions
+        """
+        n_samples = predictions.shape[1]
+        final_predictions = np.empty(n_samples, dtype=predictions.dtype)
+
+        # For each sample
+        for i in range(n_samples):
+            # Get predictions from all models for this sample
+            sample_predictions = predictions[:, i]
+            # Count occurrences of each unique label
+            unique_labels, counts = np.unique(sample_predictions, return_counts=True)
+            # Select the label with the highest count
+            final_predictions[i] = unique_labels[np.argmax(counts)]
+
+        return final_predictions

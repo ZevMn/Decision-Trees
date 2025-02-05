@@ -105,16 +105,16 @@ if __name__ == "__main__":
     kfold_validator = kfold()
 
     print("\nPerforming k-fold cross-validation on full dataset:")
-    avg_acc_full, std_dev_full = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
+    avg_acc_full, std_dev_full, full_tree = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
 
     '''Performing 10-fold cross-validation on the subset and noisy datasets:'''
     # print("\nPerforming k-fold cross-validation on subset dataset:")
-    # avg_acc_sub, std_dev_sub = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
+    # avg_acc_sub, std_dev_sub, sub_tree = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
     # print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
     #
     # print("\nPerforming k-fold cross-validation on noisy dataset:")
-    # avg_acc_noisy, std_dev_noisy = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
+    # avg_acc_noisy, std_dev_noisy, noisy_tree = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
     # print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
 
     """
@@ -127,24 +127,30 @@ if __name__ == "__main__":
     print("PART 3.2: COMBINING THE PREDICTIONS USING MAJORITY VOTING")
     print("---------------------------------------------------------")
 
-    print("Performing majority voting on test set...")
-    fold_predictions = []
+    print("\nPerforming majority voting on test set...")
 
-    # for train_indices, val_indices, test_indices in kfold_validator.train_val_test_k_fold(10, len(x_full)):
-    #     classifier = DecisionTreeClassifier()  # Create new instance for each fold
-    #     classifier.fit(x_full[train_indices], y_full[train_indices])
-    #     fold_predictions.append(classifier.predict(x_test))
-    #
-    # fold_predictions = np.array(fold_predictions)
+    # Make predictions on the test set
+    test_predictions = []
+    for tree in full_tree:
+        test_predictions.append(tree.predict(x_test))
+    test_predictions = np.array(test_predictions) # Convert to numpy array
 
-    # # Compute majority vote
-    # final_predictions = kfold_validator.majority_vote(fold_predictions)
-    #
-    # print("Evaluating ensemble model...")
-    # evaluation.evaluate(y_test, final_predictions, "K-fold")
+    # Use majority voting to combine predictions
+    majority_predictions = kfold_validator.majority_vote(test_predictions)
+
+    # Calculate and print the final accuracy
+    ensemble_accuracy = np.mean(majority_predictions == y_test)
+    print(f"\nEnsemble Model Accuracy on Test Set: {ensemble_accuracy:.4f}")
+
+    print("\nEvaluating ensemble model...")
+    evaluation.evaluate(y_test, majority_predictions, "K-fold")
 
     """
         *******************************************
                         PART 4
         *******************************************
     """
+
+    print("\n-----------------------------------")
+    print("PART 4: IMPROVING OUR DECISION TREE")
+    print("-----------------------------------")
