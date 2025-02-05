@@ -14,94 +14,110 @@ from classification import DecisionTreeClassifier
 
 def train_and_predict(x_train, y_train, x_test, x_val, y_val):
     """ Interface to train and test the new/improved decision tree.
-    
-    This function is an interface for training and testing the new/improved
-    decision tree classifier. 
 
-    x_train and y_train should be used to train your classifier, while 
-    x_test should be used to test your classifier. 
-    x_val and y_val may optionally be used as the validation dataset. 
+    This function is an interface for training and testing the new/improved
+    decision tree classifier.
+
+    x_train and y_train should be used to train your classifier, while
+    x_test should be used to test your classifier.
+    x_val and y_val may optionally be used as the validation dataset.
     You can just ignore x_val and y_val if you do not need a validation dataset.
 
     Args:
-    x_train (numpy.ndarray): Training instances, numpy array of shape (N, K) 
+    x_train (numpy.ndarray): Training instances, numpy array of shape (N, K)
                        N is the number of instances
                        K is the number of attributes
     y_train (numpy.ndarray): Class labels, numpy array of shape (N, )
-                       Each element in y is a str 
-    x_test (numpy.ndarray): Test instances, numpy array of shape (M, K) 
+                       Each element in y is a str
+    x_test (numpy.ndarray): Test instances, numpy array of shape (M, K)
                             M is the number of test instances
                             K is the number of attributes
-    x_val (numpy.ndarray): Validation instances, numpy array of shape (L, K) 
+    x_val (numpy.ndarray): Validation instances, numpy array of shape (L, K)
                        L is the number of validation instances
                        K is the number of attributes
     y_val (numpy.ndarray): Class labels of validation set, numpy array of shape (L, )
-    
+
     Returns:
     numpy.ndarray: A numpy array of shape (M, ) containing the predicted class label for each instance in x_test
     """
 
-    #######################################################################
-    #                 ** TASK 4.1: COMPLETE THIS FUNCTION **
-    #######################################################################
-       
+    # Perform grid search to find the best parameters
+    best_params = grid_search(x_train, y_train, x_val, y_val)
 
-    # TODO: Train new classifier
-    best_params = grid_search(x_train, y_train, x_test, x_val, y_val);
-    # set up an empty (M, ) numpy array to store the predicted labels 
-    # feel free to change this if needed
-    improved_tree = DecisionTreeClassifier(max_depth = best_params["max_depth"], min_samples_split = best_params["min_samples_split"])
+    # Train improved decision tree with best hyperparameters
+    improved_tree = DecisionTreeClassifier(
+        max_depth=best_params["max_depth"],
+        min_samples_split=best_params["min_samples_split"],
+        min_impurity_decrease=best_params["min_impurity_decrease"]
+    )
     improved_tree.fit(x_train, y_train)
 
-    predictions = np.zeros((x_test.shape[0],), dtype=object)
-        
-    # TODO: Make predictions on x_test using new classifier        
-        
-    # remember to change this if you rename the variable
+    # Make predictions on x_test
+    predictions = improved_tree.predict(x_test)
     return predictions
 
 def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
-    """ Generate train and test indices at each fold.
-
-        Args:
-            n_folds (int): Number of folds
-            n_instances (int): Total number of instances
-            random_generator (np.random.Generator): A random generator
-
-        Returns:
-            list: a list of length n_folds. Each element in the list is a list (or tuple)
-                with three elements:
-                - a numpy array containing the train indices
-                - a numpy array containing the val indices
-                - a numpy array containing the test indices
-        """
     shuffled_indices = random_generator.permutation(n_folds)
     fold_splits = np.array_split(shuffled_indices, n_folds)
     folds = []
 
     for k in range(n_folds):
         test_indices = fold_splits[k]
-        remaining_folds = [fold_splits ]
+        remaining_folds = [fold_splits[i] for i in range(n_folds) if i != k ]
+        # First remaining split as validation set
+        val_indices = remaining_folds[0]
+        # Exclude the val and test indices
+        train_indices = np.hstack(remaining_folds[1])
+        folds.append((train_indices, val_indices, test_indices))
 
-    return
+    return folds
 
-def optimise_parameters():
+def optimise_parameters(x_train, y_train, x_val, y_val):
+    best_params = {"max_depth": None, "min_samples_split": None, "min_samples_leaf": None}
+    best_accuracy = 0
+
     for max_depth in [None, 1, 5, 10]:
+        params = {"max_depth": max_depth, "min_samples_split": None, "min_samples_leaf": None}
+        acc = comp_accuracy(x_train,y_train,x_val,params)
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params["max_depth"] = max_depth
         # Call grid search
         # Call comp_accuracy to find best max_depth
-        pass
+
     for min_elements_in_subset in range(10):
+        params["min_samples_split"] = min_elements_in_subset
+        acc = comp_accuracy(x_train,y_train,x_val,params)
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params["min_samples_split"] = min_elements_in_subset
+
         # Call grid search with max_depth set to the above
         # Call comp_accuracy to find best min_elements_in_subset
-        pass
+
     for min_impurity_decrease in np.arange(0, 1, 0.1):
+        params["min_impurity_decrease"] = min_impurity_decrease
+        acc = comp_accuracy(x_train,y_train,x_val,params)
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params["min_impurity_decrease"] = min_impurity_decrease
         # Call grid search with max_depth and min_elements_in_subset set to the above
         # Call comp_accuracy to find best min_impurity_decrease
-        pass
-    return
 
-def comp_accuracy():
-    return;
+    return best_params
+
+def comp_accuracy(x_train,y_train,x_val,y_val,params)
+    # Create a decision treem model for the new values
+    model = DecisionTreeClassifier(
+        max_depth = params["max_depth"],
+        min_samples_split = params["min_samples_split"],
+        min_impurity_decrease = params["min_impurity_decrease"]
+    )
+    # Fit the model
+    model.fit(x_train,y_train)
+    val_predictions = model.predict(x_val)
+
+    return np.mean(val_predictions == y_val)
 
 def grid_search(x_train, y_train, x_test, x_val, y_val):
     # for i, (train_indices, val_indices, test_indices) in enumerate(train_val_test_k_fold(n_folds, len(x), rg)):
