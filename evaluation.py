@@ -150,7 +150,7 @@ class Evaluation(object):
             xticklabels=class_labels,
             yticklabels=class_labels
         )
-        plt.title(title)
+        plt.title(f"Confusion Matrix {title}")
         plt.xlabel("Predicted")
         plt.ylabel("Actual")
         plt.show()
@@ -221,11 +221,8 @@ class Evaluation(object):
         print("F1 Score: ", f1_score)
 
 
-
-
         # Plot confusion matrix and metrics
-        self.plot_confusion_matrix(confusion, class_labels)
+        self.plot_confusion_matrix(confusion, class_labels, title)
         self.plot_metrics(y_gold, y_prediction, class_labels, title)
 
         return confusion, accuracy, precision, recall, f1_score
-

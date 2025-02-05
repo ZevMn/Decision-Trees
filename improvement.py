@@ -75,6 +75,13 @@ def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
                 - a numpy array containing the val indices
                 - a numpy array containing the test indices
         """
+    shuffled_indices = random_generator.permutation(n_folds)
+    fold_splits = np.array_split(shuffled_indices, n_folds)
+    folds = []
+
+    for k in range(n_folds):
+        test_indices = fold_splits[k]
+        remaining_folds = [fold_splits ]
 
     return
 
