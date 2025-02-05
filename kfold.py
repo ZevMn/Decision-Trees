@@ -1,5 +1,8 @@
 import numpy as np
 
+from classification import DecisionTreeClassifier
+
+
 class kfold(object):
 
     def __init__(self):
@@ -54,28 +57,28 @@ class kfold(object):
 
         return folds
 
-    def k_fold_evaluation(self, model, X, Y, n_folds=10):
+    def k_fold_train_and_evaluation(self, x, y, n_folds=10):
         accuracies = np.zeros((n_folds,))
+
         rg = np.random.default_rng()
-        folds = self.train_val_test_k_fold(n_folds, len(X), rg)
+        folds = self.train_test_k_fold(len(x), n_folds, rg)
 
-        for i, (train_indices, val_indices, test_indices) in enumerate(folds):
-            x_train, y_train = X[train_indices], Y[train_indices]
-            x_val, y_val = X[val_indices], Y[val_indices]
-            x_test, y_test = X[test_indices], Y[test_indices]
+        # Iterate through each split of the folds and compute the accuracy
+        for i, (train_indices, test_indices) in enumerate(folds):
 
-            # Train the model
-            model.fit(x_train, y_train)
+            # Get the dataset from the split indices
+            x_train, y_train = x[train_indices, :], y[train_indices]
+            x_test, y_test = x[test_indices, :], y[test_indices]
 
-            # Validate model (Optional: You can perform hyperparameter tuning here)
-            y_val_pred = model.predict(x_val)
-            val_accuracy = np.mean(y_val_pred == y_val)
+            # Train the decision tree
+            tree = DecisionTreeClassifier()
+            tree.fit(x_train, y_train)
 
-            # Test the best model on test set
-            y_test_pred = model.predict(x_test)
-            test_accuracy = np.mean(y_test_pred == y_test)
+            # Test it
+            predictions = tree.predict(x_test)
+            accuracy = np.mean(predictions == y_test)
 
-            accuracies[i] = test_accuracy  # Store test accuracy
+            accuracies[i] = accuracy  # Store test accuracy
 
         print("Accuracies per fold:", accuracies)
         print("Average Accuracy:", accuracies.mean())
@@ -83,10 +86,10 @@ class kfold(object):
 
         return accuracies.mean(), accuracies.std()
 
-    def majority_vote(self, predictions):
-        n_samples = predictions.shape[1]
-        final_predictions = np.empty(n_samples, dtype=predictions.dtype)
-        for i in range(n_samples):
-            unique_labels, counts = np.unique(predictions[:, i], return_counts=True)
-            final_predictions[i] = unique_labels[np.argmax(counts)]
-        return final_predictions
+    # def majority_vote(self, predictions):
+    #     n_samples = predictions.shape[1]
+    #     final_predictions = np.empty(n_samples, dtype=predictions.dtype)
+    #     for i in range(n_samples):
+    #         unique_labels, counts = np.unique(predictions[:, i], return_counts=True)
+    #         final_predictions[i] = unique_labels[np.argmax(counts)]
+    #     return final_predictions
