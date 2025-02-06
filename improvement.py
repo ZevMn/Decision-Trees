@@ -76,7 +76,7 @@ class improvement:
 
             # Grid search for max_depth
             gridsearch_accuracies = []
-            for max_depth in [10, 5, 1, None]:  # Avoid using None
+            for max_depth in [None, 5, 10, 15, 20]:  # Avoid using None
                 decision_tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
                 decision_tree_classifier.fit(x_train, y_train)
                 predictions = decision_tree_classifier.predict(x_val)
@@ -89,7 +89,7 @@ class improvement:
 
             # Grid search for min_sample_split
             gridsearch_accuracies = []
-            for min_sample_split in reversed(range(2, 20)):
+            for min_sample_split in np.arange(1, 50, 2):
                 decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth,
                                                                   min_sample_split=min_sample_split)
                 decision_tree_classifier.fit(x_train, y_train)
