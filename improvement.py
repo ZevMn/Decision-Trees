@@ -57,6 +57,67 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val):
     predictions = improved_tree.predict(x_test)
     return predictions
 
+def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng()):
+
+    # Split the dataset into k splits of indices
+    split_indices = kfold.k_fold_split(n_instances, n_folds, random_generator)
+
+    folds = []
+    # Iterate through the folds each time selecting one as the test set and the rest for training
+    for k in range(n_folds):
+        # Select k as the test set, and k+1 as validation (or 0 if k is the final split)
+        test_indices = split_indices[k]
+        val_indices = split_indices[(k + 1) % n_folds]
+
+        # Concatenate remaining folds for training
+        train_indices = np.zeros((0,), dtype=np.int)
+        for i in range(n_folds):
+            if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
+                train_indices = np.hstack([train_indices, split_indices[i]])
+
+        folds.append([train_indices, val_indices, test_indices])
+
+    return folds
+
+def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
+
+    accuracies = np.zeros((n_folds,))
+
+    # Iterate through each set of folds
+    for i, (train_indices, val_indices, test_indices) in enumerate(train_val_test_k_fold(len(x), n_folds, random_generator)):
+        # Set up the dataset for the current fold
+        x_train = x[train_indices, :]
+        y_train = y[train_indices]
+        x_val = x[val_indices, :]
+        y_val = y[val_indices]
+        x_test = x[test_indices, :]
+        y_test = y[test_indices]
+
+        # Perform grid search, i.e.
+        # evaluate DecisionTreeClassifier for max_depth, min_sample_split, min_impurity_decrease
+        # and store the accuracy and classifier for each max_depth
+        gridsearch_accuracies = []
+
+
+        for nn in range(1, 11):
+            knn_classifier = KNNClassifier(k=nn)
+            knn_classifier.fit(x_train, y_train)
+            predictions = knn_classifier.predict(x_val)
+            acc = accuracy(y_val, predictions)
+            gridsearch_accuracies.append((acc, nn, knn_classifier))
+
+        # Select the classifier with the highest accuracy
+        # and evaluate this classifier on x_test
+        # key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+        (best_acc, best_nn, best_classifier) = max(gridsearch_accuracies, key=lambda x: x[0])
+        # print(gridsearch_accuracies)
+        print((best_acc, best_nn))
+
+        predictions = best_classifier.predict(x_test)
+        acc = accuracy(y_test, predictions)
+        accuracies[i] = acc
+    return
+
 def optimise_parameters(x_train, y_train, x_val, y_val):
     best_params = {"max_depth": None, "min_sample_split": 1, "min_samples_leaf": 1}
     best_accuracy = 0
@@ -80,28 +141,6 @@ def optimise_parameters(x_train, y_train, x_val, y_val):
             best_params["min_impurity_decrease"] = min_impurity_decrease
 
     return best_params
-
-def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng()):
-
-    # Split the dataset into k splits of indices
-    split_indices = kfold.k_fold_split(n_instances, n_folds, random_generator)
-
-    folds = []
-    # Iterate through the folds each time selecting one as the test set and the rest for training
-    for k in range(n_folds):
-        # Select k as the test set, and k+1 as validation (or 0 if k is the final split)
-        test_indices = split_indices[k]
-        val_indices = split_indices[(k + 1) % n_folds]
-
-        # Concatenate remaining folds for training
-        train_indices = np.zeros((0,), dtype=np.int)
-        for i in range(n_folds):
-            if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
-                train_indices = np.hstack([train_indices, split_indices[i]])
-
-        folds.append([train_indices, val_indices, test_indices])
-
-    return folds
 
 def comp_accuracy(x_train, y_train, x_val, y_val, params):
     # Create a decision treem model for the new values
