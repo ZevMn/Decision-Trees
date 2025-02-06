@@ -98,18 +98,41 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
         # and store the accuracy and classifier for each max_depth
         gridsearch_accuracies = []
 
-
-        for nn in range(1, 11):
-            knn_classifier = KNNClassifier(k=nn)
-            knn_classifier.fit(x_train, y_train)
-            predictions = knn_classifier.predict(x_val)
-            acc = accuracy(y_val, predictions)
-            gridsearch_accuracies.append((acc, nn, knn_classifier))
+        for max_depth in [None, 1, 5, 10]:
+            decision_tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
+            decision_tree_classifier.fit(x_train, y_train)
+            predictions = decision_tree_classifier.predict(x_val)
+            current_accuracy = np.mean(predictions == y_val)
+            gridsearch_accuracies.append((current_accuracy, max_depth, decision_tree_classifier))
 
         # Select the classifier with the highest accuracy
+        # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+        (best_accuracy, best_max_depth, best_classifier) = max(gridsearch_accuracies, key=lambda param:param[0])
+
+        # Now using this max_depth, perform grid search to optimise min_sample_split
+        for min_sample_split in range(10):
+            decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth, min_sample_split=min_sample_split)
+            decision_tree_classifier.fit(x_train, y_train)
+            predictions = decision_tree_classifier.predict(x_val)
+            current_accuracy = np.mean(predictions == y_val)
+            gridsearch_accuracies.append((current_accuracy, min_sample_split, decision_tree_classifier))
+
+        # Again, select the classifier with the highest accuracy
+        (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
+
+        for min_impurity_decrease in np.arange(0, 1, 0.1):
+            decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth, min_sample_split=min_sample_split)
+            decision_tree_classifier.fit(x_train, y_train)
+            predictions = decision_tree_classifier.predict(x_val)
+            current_accuracy = np.mean(predictions == y_val)
+            gridsearch_accuracies.append((current_accuracy, min_sample_split, decision_tree_classifier))
+
+        # Again, select the classifier with the highest accuracy
+        (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
+
+
+
         # and evaluate this classifier on x_test
-        # key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-        (best_acc, best_nn, best_classifier) = max(gridsearch_accuracies, key=lambda x: x[0])
         # print(gridsearch_accuracies)
         print((best_acc, best_nn))
 
