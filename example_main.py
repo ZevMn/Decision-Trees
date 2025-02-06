@@ -7,7 +7,7 @@
 import numpy as np
 
 from classification import DecisionTreeClassifier
-from evaluation import Evaluation
+from evaluation import evaluate
 from improvement import train_and_predict
 from kfold import majority_vote, k_fold_train_and_evaluation
 from read_data import read_dataset, display_barcharts, different_labels
@@ -81,16 +81,14 @@ if __name__ == "__main__":
     print("PART 3.1: EVALUATION OF THE MODEL PERFORMANCE")
     print("---------------------------------------------")
 
-    evaluation = Evaluation()
-
     print("\nEvaluation of the model trained on the full dataset: ")
-    evaluation.evaluate(y_test, predictions_full, "train_full.txt")
+    evaluate(y_test, predictions_full, "train_full.txt")
 
     print("\nEvaluation of the model trained on the subset dataset: ")
-    evaluation.evaluate(y_test, predictions_sub, "train_sub.txt")
+    evaluate(y_test, predictions_sub, "train_sub.txt")
 
     print("\nEvaluation of the model trained on the noisy dataset: ")
-    evaluation.evaluate(y_test, predictions_noisy, "train_noisy.txt")
+    evaluate(y_test, predictions_noisy, "train_noisy.txt")
 
     """
         *******************************************
@@ -107,14 +105,6 @@ if __name__ == "__main__":
     avg_acc_full, std_dev_full, full_trees = k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
 
-    '''Performing k-fold cross-validation on the subset and noisy datasets:'''
-    # print("\nPerforming k-fold cross-validation on subset dataset:")
-    # avg_acc_sub, std_dev_sub, sub_trees = k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
-    # print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
-    #
-    # print("\nPerforming k-fold cross-validation on noisy dataset:")
-    # avg_acc_noisy, std_dev_noisy, noisy_trees = k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
-    # print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
 
     """
         *******************************************
@@ -142,7 +132,7 @@ if __name__ == "__main__":
     print(f"\nEnsemble Model Accuracy on Test Set: {ensemble_accuracy:.4f}")
 
     print("\nEvaluating ensemble model...")
-    evaluation.evaluate(y_test, majority_predictions, "K-fold")
+    evaluate(y_test, majority_predictions, "K-fold")
 
     """
         *******************************************

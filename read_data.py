@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.random import default_rng
-
 import matplotlib.pylab as pylab
 params = {'legend.fontsize': 'medium',
           'figure.figsize': (15, 5),
@@ -36,7 +35,7 @@ def read_dataset(filepath):
             x_attribute.append(list(map(int, row[:-1])))
             y_labels.append(row[-1])
 
-    [classes,y_mask] = np.unique(y_labels, return_inverse=True)
+    [classes,_] = np.unique(y_labels, return_inverse=True)
 
     x_attribute = np.array(x_attribute)
     y = np.array(y_labels)
@@ -45,7 +44,6 @@ def read_dataset(filepath):
     for i in classes:
         count = y_labels.count(i)
         ratio = count/len(y_labels)
-        #print(f'{i} : {count}')
         print(f'{i} : {ratio*100:.2f}')
         ratio_list.append(ratio)
 
@@ -53,6 +51,7 @@ def read_dataset(filepath):
 
 
 def display_barcharts(y1, y2, classes, legend1, legend2):
+
     ratio_list1 = []
     ratio_list2 = []
     counts1 = []
@@ -98,14 +97,6 @@ def display_barcharts(y1, y2, classes, legend1, legend2):
     plt.tight_layout()
     plt.show()
 
-    return
-
-
-# # Add value labels on top of each bar
-# for i, (full_val, subset_val) in enumerate(zip(full_values, subset_values)):
-#     plt.text(x[i] - width/2, full_val, f'{full_val:.2f}', ha='center', va='bottom')
-#     plt.text(x[i] + width/2, subset_val, f'{subset_val:.2f}', ha='center', va='bottom')
-
 
 def different_labels(x_full, y_full, x_noisy, y_noisy, classes):
 
@@ -122,6 +113,3 @@ def different_labels(x_full, y_full, x_noisy, y_noisy, classes):
     print(f"\nProportion of changed labels: {proportion_changed:.4f} ({num_changed} out of {total_labels})")
 
     display_barcharts(y_full_sorted, y_noisy_sorted, classes, "train_full.txt", "train_noisy.txt")
-
-    return
-
