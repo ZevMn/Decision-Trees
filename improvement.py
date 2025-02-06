@@ -47,7 +47,7 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val):
     # Train improved decision tree with best hyperparameters
     improved_tree = DecisionTreeClassifier(
         max_depth=best_params["max_depth"],
-        min_samples_split=best_params["min_samples_split"],
+        min_sample_split=best_params["min_samples_split"],
         min_impurity_decrease=best_params["min_impurity_decrease"]
     )
     improved_tree.fit(x_train, y_train)
@@ -55,6 +55,30 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val):
     # Make predictions on x_test
     predictions = improved_tree.predict(x_test)
     return predictions
+
+def optimise_parameters(x_train, y_train, x_val, y_val):
+    best_params = {"max_depth": None, "min_sample_split": 1, "min_samples_leaf": 1}
+    best_accuracy = 0
+
+    for max_depth in [None, 1, 5, 10]:
+        acc = comp_accuracy(x_train, y_train, x_val, best_params)
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params["max_depth"] = max_depth
+
+    for min_elements_in_subset in range(10):
+        acc = comp_accuracy(x_train, y_train, x_val, best_params)
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params["min_sample_split"] = min_elements_in_subset
+
+    for min_impurity_decrease in np.arange(0, 1, 0.1):
+        acc = comp_accuracy(x_train, y_train, x_val, best_params)
+        if acc > best_accuracy:
+            best_accuracy = acc
+            best_params["min_impurity_decrease"] = min_impurity_decrease
+
+    return best_params
 
 def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
     shuffled_indices = random_generator.permutation(n_folds)
@@ -72,35 +96,11 @@ def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
     return folds
 
-def optimise_parameters(x_train, y_train, x_val, y_val):
-    best_params = {"max_depth": None, "min_samples_split": 1, "min_samples_leaf": 1}
-    best_accuracy = 0
-
-    for max_depth in [None, 1, 5, 10]:
-        acc = comp_accuracy(x_train, y_train, x_val, best_params)
-        if acc > best_accuracy:
-            best_accuracy = acc
-            best_params["max_depth"] = max_depth
-
-    for min_elements_in_subset in range(10):
-        acc = comp_accuracy(x_train, y_train, x_val, best_params)
-        if acc > best_accuracy:
-            best_accuracy = acc
-            best_params["min_samples_split"] = min_elements_in_subset
-
-    for min_impurity_decrease in np.arange(0, 1, 0.1):
-        acc = comp_accuracy(x_train, y_train, x_val, best_params)
-        if acc > best_accuracy:
-            best_accuracy = acc
-            best_params["min_impurity_decrease"] = min_impurity_decrease
-
-    return best_params
-
-def comp_accuracy(x_train,y_train,x_val,y_val,params)
+def comp_accuracy(x_train, y_train, x_val, y_val, params):
     # Create a decision treem model for the new values
     model = DecisionTreeClassifier(
         max_depth = params["max_depth"],
-        min_samples_split = params["min_samples_split"],
+        min_sample_split = params["min_samples_split"],
         min_impurity_decrease = params["min_impurity_decrease"]
     )
     # Fit the model

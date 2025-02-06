@@ -23,7 +23,7 @@ class Node:
         self.left = left              # Point to another node or None if terminal Node
         self.right = right            # Point to another node or None if terminal Node
 
-class DecisionTreeClassifier(object, max_depth=None, min_elements_in_subset=1, min_impurity_decrease=0.001):
+class DecisionTreeClassifier:
     """ Basic decision tree classifier
 
     Attributes:
@@ -35,21 +35,23 @@ class DecisionTreeClassifier(object, max_depth=None, min_elements_in_subset=1, m
     prune(x_val, y_val): Post-prunes the decision tree
     """
 
-    def __init__(self):
+    def __init__(self, max_depth=None, min_sample_split=1, min_impurity_decrease=0.001):
         self.is_trained = False
         self.root = None
 
+        # Splitting parameters:
+        self.max_depth = max_depth
+        self.min_sample_split = min_sample_split
+        self.min_impurity_decrease = min_impurity_decrease
+
+        # Metrics to track tree structure
         self.depth = 0
         self.num_nodes = 0
         self.num_leaves = 0
 
-        # Splitting parameters:
-        self.min_elements_in_subset = 1
-        self.min_impurity_decrease = 0.0001
-        self.max_depth = None
 
 
-    def fit(self, x, y, min_elements_in_subset=1, min_impurity_decrease=0.0001, max_depth=None):
+    def fit(self, x, y, min_sample_split=1, min_impurity_decrease=0.0001, max_depth=None):
         """ Constructs a decision tree classifier from data
 
         Args:
@@ -60,7 +62,7 @@ class DecisionTreeClassifier(object, max_depth=None, min_elements_in_subset=1, m
                            Each element in y is a str
         """
 
-        self.min_elements_in_subset = min_elements_in_subset
+        self.min_sample_split = min_sample_split
         self.min_impurity_decrease = min_impurity_decrease
         self.max_depth = max_depth
 
@@ -140,7 +142,7 @@ class DecisionTreeClassifier(object, max_depth=None, min_elements_in_subset=1, m
         n_samples, n_features = x.shape
 
         # Stop if splitting produces a subset of size less than predetermined minimum
-        if n_samples < self.min_elements_in_subset:
+        if n_samples < self.min_sample_split:
             return None, None
 
         for feature in range(n_features):
@@ -175,7 +177,7 @@ class DecisionTreeClassifier(object, max_depth=None, min_elements_in_subset=1, m
         n_samples = len(y)
         n_labels = len(np.unique(y))
 
-        if (self.max_depth is not None and depth >= self.max_depth) or (n_labels == 1) or (n_samples <= self.min_elements_in_subset):
+        if (self.max_depth is not None and depth >= self.max_depth) or (n_labels == 1) or (n_samples <= self.min_sample_split):
             # Return a node with the mode class as its label
             unique_labels, y_int = np.unique(y, return_inverse=True)
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
