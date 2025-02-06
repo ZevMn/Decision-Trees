@@ -96,8 +96,8 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
         # Perform grid search, i.e.
         # evaluate DecisionTreeClassifier for max_depth, min_sample_split, min_impurity_decrease
         # and store the accuracy and classifier for each max_depth
-        gridsearch_accuracies = []
 
+        gridsearch_accuracies = []
         for max_depth in [None, 1, 5, 10]:
             decision_tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
             decision_tree_classifier.fit(x_train, y_train)
@@ -110,6 +110,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
         (best_accuracy, best_max_depth, best_classifier) = max(gridsearch_accuracies, key=lambda param:param[0])
 
         # Now using this max_depth, perform grid search to optimise min_sample_split
+        gridsearch_accuracies = []  # Reset
         for min_sample_split in range(10):
             decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth, min_sample_split=min_sample_split)
             decision_tree_classifier.fit(x_train, y_train)
@@ -120,83 +121,34 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
         # Again, select the classifier with the highest accuracy
         (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
 
+        # Now using this max_depth and min_sample_split, perform grid search to optimise min_entropy_decrease
+        gridsearch_accuracies = [] # Reset
         for min_impurity_decrease in np.arange(0, 1, 0.1):
-            decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth, min_sample_split=min_sample_split)
+            decision_tree_classifier = DecisionTreeClassifier(
+                max_depth=best_max_depth,
+                min_sample_split=best_min_sample_split,
+                min_impurity_decrease=min_impurity_decrease
+            )
             decision_tree_classifier.fit(x_train, y_train)
             predictions = decision_tree_classifier.predict(x_val)
             current_accuracy = np.mean(predictions == y_val)
-            gridsearch_accuracies.append((current_accuracy, min_sample_split, decision_tree_classifier))
+            gridsearch_accuracies.append((current_accuracy, min_impurity_decrease, decision_tree_classifier))
 
         # Again, select the classifier with the highest accuracy
-        (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
+        (best_accuracy, best_min_impurity_decrease, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
 
+        print("\nBest accuracy for current fold: ", best_accuracy)
+        print("Best max_depth: ", best_max_depth)
+        print("Best min_sample_split: ", best_min_sample_split)
+        print("Best min_impurity_decrease: ", best_min_impurity_decrease)
 
-
-        # and evaluate this classifier on x_test
-        # print(gridsearch_accuracies)
-        print((best_acc, best_nn))
-
+        # Finally, evaluate this classifier on x_test
         predictions = best_classifier.predict(x_test)
-        acc = accuracy(y_test, predictions)
-        accuracies[i] = acc
+        final_accuracy = np.mean(predictions == y_val)
+        accuracies[i] = final_accuracy
+
+    print("Final accuracies: ", accuracies)
+    print("Mean: ", np.mean(accuracies))
+    print("Standard deviation: ", np.std(accuracies))
+
     return
-
-def optimise_parameters(x_train, y_train, x_val, y_val):
-    best_params = {"max_depth": None, "min_sample_split": 1, "min_samples_leaf": 1}
-    best_accuracy = 0
-
-    for max_depth in [None, 1, 5, 10]:
-        acc = comp_accuracy(x_train, y_train, x_val, best_params)
-        if acc > best_accuracy:
-            best_accuracy = acc
-            best_params["max_depth"] = max_depth
-
-    for min_elements_in_subset in range(10):
-        acc = comp_accuracy(x_train, y_train, x_val, best_params)
-        if acc > best_accuracy:
-            best_accuracy = acc
-            best_params["min_sample_split"] = min_elements_in_subset
-
-    for min_impurity_decrease in np.arange(0, 1, 0.1):
-        acc = comp_accuracy(x_train, y_train, x_val, best_params)
-        if acc > best_accuracy:
-            best_accuracy = acc
-            best_params["min_impurity_decrease"] = min_impurity_decrease
-
-    return best_params
-
-def comp_accuracy(x_train, y_train, x_val, y_val, params):
-    # Create a decision treem model for the new values
-    model = DecisionTreeClassifier(
-        max_depth = params["max_depth"],
-        min_sample_split = params["min_samples_split"],
-        min_impurity_decrease = params["min_impurity_decrease"]
-    )
-    # Fit the model
-    model.fit(x_train,y_train)
-    val_predictions = model.predict(x_val)
-
-    return np.mean(val_predictions == y_val)
-
-def grid_search(x_train, y_train, x_test, x_val, y_val):
-    # for i, (train_indices, val_indices, test_indices) in enumerate(train_val_test_k_fold(n_folds, len(x), rg)):
-    #     # set up the dataset for this fold
-    #     x_train = x[train_indices, :]
-    #     y_train = y[train_indices]
-    #     x_val = x[val_indices, :]
-    #     y_val = y[val_indices]
-    #     x_test = x[test_indices, :]
-    #     y_test = y[test_indices]
-
-    #
-
-    # Iterate through depth
-    # For each fold, call predict on training split
-    # and evaluate accuracy using validation split
-    # Append accuracy to an empty list
-    # After evaluating all folds, return depth that gave the best accuracy
-    # Now using this depth, repeat for min_sample_size
-    # Now using that depth and min_sample_size, repeat for min_entropy_gain
-    return
-
-
