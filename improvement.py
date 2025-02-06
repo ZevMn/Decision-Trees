@@ -59,6 +59,10 @@ class improvement:
 
         accuracies = np.zeros((n_folds,))
 
+        best_max_depth = 0
+        best_min_sample_split = 0
+        best_min_impurity_decrease = 0
+
         # Iterate through each set of folds
         for i, (train_indices, val_indices, test_indices) in enumerate(
                 self.train_val_test_k_fold(len(x), n_folds, random_generator)):
