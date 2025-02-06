@@ -9,10 +9,6 @@
 
 import numpy as np
 import math as math
-from numpy.random import default_rng
-
-from pyexpat import features
-
 
 class Node:
     """ Represents a node in the decision tree """
@@ -48,7 +44,6 @@ class DecisionTreeClassifier:
         self.depth = 0
         self.num_nodes = 0
         self.num_leaves = 0
-
 
 
     def fit(self, x, y, min_sample_split=1, min_impurity_decrease=0.0001, max_depth=None):
@@ -92,11 +87,18 @@ class DecisionTreeClassifier:
         Returns:
         The information entropy of the given dataset.
         """
+
+        # Initialise entropy to 0
         entropy = 0
 
+        # Count the occurences of each unique label
         [_, count] = np.unique(labels, return_counts=True)
+
+        # Calculate entropy based on label proportions
         for i in count:
+            # Proportion of each class
             proportion = i / len(labels)
+            # Update entropy using the formula
             entropy -= proportion * math.log2(proportion)
 
         return entropy
@@ -115,13 +117,20 @@ class DecisionTreeClassifier:
         The information gain of a given splitting.
         """
 
+        # Total number of samples in the original dataset
         len_before = len(y)
+
+        # Number of samples in the left and right subsets
         len_left = len(y_left)
         len_right = len(y_right)
 
+        # Calculate entropy before splitting
         h_before = self.entropy(y)
+
+        # Calculate weighted average entropy after splitting
         h_after = ((len_left / len_before) * self.entropy(y_left)) + ((len_right / len_before) * self.entropy(y_right))
 
+        # Returning the information gain which is the difference in entropy
         return h_before - h_after
 
 
@@ -136,32 +145,38 @@ class DecisionTreeClassifier:
         The feature and threshold which represent the splitting with the greatest information entropy gain.
         """
 
+        # Initialise variables to keep track of the best feature, threshold and information gain
         best_feature, best_threshold = None, None
         best_gain = -1.0
 
+        # Get the number of samples (N) and features (K) in the dataset
         n_samples, n_features = x.shape
 
         # Stop if splitting produces a subset of size less than predetermined minimum
         if n_samples < self.min_sample_split:
             return None, None
 
+        # Loop through each feature in the dataset
         for feature in range(n_features):
+            # Get all unique values of the feature as potential thresholds
             thresholds = np.unique(x[:, feature])
 
             # Loop through all possible thresholds for each feature
             # NB: This is possible because features are discrete integers from 0 to 15
             for threshold in thresholds:
+                # Create masks to split the dataset into left and right subsets
                 left_mask = x[:, feature] <= threshold
                 right_mask = ~left_mask
 
+                # Skip invalid splits (where one subset is empty)
                 if not np.any(left_mask) or not np.any(right_mask):
                     continue
 
                 # Calculate the information entropy gain for each possible splitting
                 entropy_gain = self.information_gain(y, y[left_mask], y[right_mask])
-                # print(f"Evaluating feature {feature}, threshold {threshold}, gain {entropy_gain}")
 
                 # Keep track of the best splitting
+                # Update the best split if the current split has higher information gain
                 if entropy_gain > best_gain and entropy_gain > self.min_impurity_decrease:
                     best_gain = entropy_gain
                     best_feature = feature

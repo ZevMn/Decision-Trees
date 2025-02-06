@@ -62,23 +62,29 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
     # Perform grid search, i.e.
     # evaluate DecisionTreeClassifier for many possible combinations of
     # max_depth, min_sample_split, min_impurity_decrease
+
+    # Define the hyperparameter ranges to test
     max_depths = [None, 5, 10]
     min_sample_splits = range(1, 3)
-    min_impurity_decreases = np.arange(0.1, 0.5, 0.1)
+    min_impurity_decreases = np.linspace(0.1, 0.05, num=2)
     param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
     # Grid search for all combinations of parameters
     gridsearch_accuracies = []
+
+    # Iterate through all combinations of hyperparameters
     for combination in param_combinations:
+        # Initialise the decision tree with current hyperparameters
         decision_tree_classifier = DecisionTreeClassifier(
             max_depth=combination[0],
             min_sample_split=combination[1],
             min_impurity_decrease=combination[2]
         )
 
-        # Iterate through each set of folds
+        # Iterate through each set of folds- Perform k-fold cross validation
         for i, (train_indices, val_indices, test_indices) in enumerate(
                 train_val_test_k_fold(len(x), n_folds, random_generator)):
+
             # Set up the dataset for the current fold
             x_train = x[train_indices, :]
             y_train = y[train_indices]
@@ -87,9 +93,16 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
             x_test = x[test_indices, :]
             y_test = y[test_indices]
 
+            # Train the decision tree on the training set
             decision_tree_classifier.fit(x_train, y_train)
+
+            # Predict labels on the validation set
             predictions = decision_tree_classifier.predict(x_val)
+
+            # Compute the accuracy for the current fold
             current_accuracy = np.mean(predictions == y_val)
+
+            # Store the current accuracy along with the parameter combination
             gridsearch_accuracies.append((current_accuracy, combination, decision_tree_classifier))
 
     # Select the classifier with the highest accuracy
@@ -119,7 +132,9 @@ def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.de
         # Concatenate remaining folds for training
         train_indices = np.zeros((0,), dtype=int)
         for i in range(n_folds):
-            if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
+            # Concatenate to training set if not validation or test
+            if i not in [k, (k + 1) % n_folds]:
+                # Horizontally stack the arrays
                 train_indices = np.hstack([train_indices, split_indices[i]])
 
         folds.append([train_indices, val_indices, test_indices])

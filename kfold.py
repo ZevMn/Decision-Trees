@@ -14,8 +14,10 @@ def k_fold_split(n_instances, n_folds=10, random_generator=np.random.default_rng
     Returns:
         list: Each element is a numpy array containing the indices of the instances in that fold.
     """
-    shuffled_indices = random_generator.permutation(n_instances)  # Generate a random permutation of indices
-    split_indices = np.array_split(shuffled_indices, n_folds)  # Split shuffled indices into k folds
+    # Generate a random permutation of indices
+    shuffled_indices = random_generator.permutation(n_instances)
+    # Split shuffled indices into k folds
+    split_indices = np.array_split(shuffled_indices, n_folds)
 
     return split_indices
 
@@ -51,10 +53,15 @@ def train_test_k_fold(n_instances, n_folds=10, random_generator=np.random.defaul
     return folds
 
 def k_fold_train_and_evaluation(x, y, n_folds=10):
+
+    # Store accuracy for each fold
     accuracies = np.zeros((n_folds,))
+    # Store trained decision trees
     trees = []
 
+    # Random generator for shuffling
     rg = np.random.default_rng()
+    # Get train/test splits
     folds = train_test_k_fold(len(x), n_folds, rg)
 
     # Iterate through each split of the folds and compute the accuracy
@@ -69,7 +76,7 @@ def k_fold_train_and_evaluation(x, y, n_folds=10):
         tree.fit(x_train, y_train)
         trees.append(tree)
 
-        # Test it
+        # Test out the predictions
         predictions = tree.predict(x_test)
         accuracy = np.mean(predictions == y_test)
         accuracies[i] = accuracy  # Store test accuracy
