@@ -53,9 +53,9 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
     # Perform grid search, i.e.
     # evaluate DecisionTreeClassifier for many possible combinations of
     # max_depth, min_sample_split, min_impurity_decrease
-    max_depths = [None, 5, 10, 15, 20]
-    min_sample_splits = range(1, 20)
-    min_impurity_decreases = range(0.01, 0.5, 0.01)
+    max_depths = [None, 5, 10]
+    min_sample_splits = range(1, 3)
+    min_impurity_decreases = np.arange(0.1, 0.5, 0.1)
     param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
     # Grid search for all combinations of parameters
@@ -69,7 +69,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
 
         # Iterate through each set of folds
         for i, (train_indices, val_indices, test_indices) in enumerate(
-                self.train_val_test_k_fold(len(x), n_folds, random_generator)):
+                train_val_test_k_fold(len(x), n_folds, random_generator)):
             # Set up the dataset for the current fold
             x_train = x[train_indices, :]
             y_train = y[train_indices]

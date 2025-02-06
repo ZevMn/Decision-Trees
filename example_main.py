@@ -156,4 +156,4 @@ if __name__ == "__main__":
     print("-----------------------------------")
 
     print("Performing k-fold cross-validation on the full dataset...")
-    kfold_validator = train_and_predict(x_full, y_full, x_val, y_val, n_folds=10)
+    kfold_validator = train_and_predict(x_full, y_full, x_test, x_val, y_val, n_folds=10)
