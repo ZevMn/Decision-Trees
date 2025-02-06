@@ -23,7 +23,7 @@ class Node:
         self.left = left              # Point to another node or None if terminal Node
         self.right = right            # Point to another node or None if terminal Node
 
-class DecisionTreeClassifier(object):
+class DecisionTreeClassifier(object, max_depth=None, min_elements_in_subset=1, min_impurity_decrease=0.001):
     """ Basic decision tree classifier
 
     Attributes:

@@ -42,7 +42,7 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val):
     """
 
     # Perform grid search to find the best parameters
-    best_params = grid_search(x_train, y_train, x_val, y_val)
+    best_params = optimise_parameters(x_train, y_train, x_val, y_val)
 
     # Train improved decision tree with best hyperparameters
     improved_tree = DecisionTreeClassifier(
@@ -73,36 +73,26 @@ def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
     return folds
 
 def optimise_parameters(x_train, y_train, x_val, y_val):
-    best_params = {"max_depth": None, "min_samples_split": None, "min_samples_leaf": None}
+    best_params = {"max_depth": None, "min_samples_split": 1, "min_samples_leaf": 1}
     best_accuracy = 0
 
     for max_depth in [None, 1, 5, 10]:
-        params = {"max_depth": max_depth, "min_samples_split": None, "min_samples_leaf": None}
-        acc = comp_accuracy(x_train,y_train,x_val,params)
+        acc = comp_accuracy(x_train, y_train, x_val, best_params)
         if acc > best_accuracy:
             best_accuracy = acc
             best_params["max_depth"] = max_depth
-        # Call grid search
-        # Call comp_accuracy to find best max_depth
 
     for min_elements_in_subset in range(10):
-        params["min_samples_split"] = min_elements_in_subset
-        acc = comp_accuracy(x_train,y_train,x_val,params)
+        acc = comp_accuracy(x_train, y_train, x_val, best_params)
         if acc > best_accuracy:
             best_accuracy = acc
             best_params["min_samples_split"] = min_elements_in_subset
 
-        # Call grid search with max_depth set to the above
-        # Call comp_accuracy to find best min_elements_in_subset
-
     for min_impurity_decrease in np.arange(0, 1, 0.1):
-        params["min_impurity_decrease"] = min_impurity_decrease
-        acc = comp_accuracy(x_train,y_train,x_val,params)
+        acc = comp_accuracy(x_train, y_train, x_val, best_params)
         if acc > best_accuracy:
             best_accuracy = acc
             best_params["min_impurity_decrease"] = min_impurity_decrease
-        # Call grid search with max_depth and min_elements_in_subset set to the above
-        # Call comp_accuracy to find best min_impurity_decrease
 
     return best_params
 
@@ -128,6 +118,8 @@ def grid_search(x_train, y_train, x_test, x_val, y_val):
     #     y_val = y[val_indices]
     #     x_test = x[test_indices, :]
     #     y_test = y[test_indices]
+
+    #
 
     # Iterate through depth
     # For each fold, call predict on training split
