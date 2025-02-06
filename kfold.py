@@ -76,7 +76,7 @@ def k_fold_train_and_evaluation(x, y, n_folds=10):
         tree.fit(x_train, y_train)
         trees.append(tree)
 
-        # Test out the predictions
+        # Test it
         predictions = tree.predict(x_test)
         accuracy = np.mean(predictions == y_test)
         accuracies[i] = accuracy  # Store test accuracy

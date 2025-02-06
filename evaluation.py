@@ -25,8 +25,7 @@ def confusion_matrix(y_gold, y_prediction, class_labels=None):
     # Create a base confusion matrix filled with zeros
     confusion = np.zeros((len(class_labels), len(class_labels)), dtype=int)
 
-    # For each correct class (row),
-    # compute how many instances are predicted for each class (columns)
+    # For each correct class (row) compute how many instances are predicted for each class (columns)
     for (i, label) in enumerate(class_labels):
         # Get predictions where the ground truth is the current class label
         indices = (y_gold == label)

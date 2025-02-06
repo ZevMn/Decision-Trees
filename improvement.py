@@ -66,7 +66,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
     # Define the hyperparameter ranges to test
     max_depths = [None, 5, 10]
     min_sample_splits = range(1, 3)
-    min_impurity_decreases = np.linspace(0.1, 0.05, num=2)
+    min_impurity_decreases = np.linspace(0.1, 0.5, num=3)
     param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
     # Grid search for all combinations of parameters
@@ -81,7 +81,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
             min_impurity_decrease=combination[2]
         )
 
-        # Iterate through each set of folds- Perform k-fold cross validation
+        # Iterate through each set of folds (perform k-fold cross validation)
         for i, (train_indices, val_indices, test_indices) in enumerate(
                 train_val_test_k_fold(len(x), n_folds, random_generator)):
 
@@ -93,10 +93,10 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
             x_test = x[test_indices, :]
             y_test = y[test_indices]
 
-            # Train the decision tree on the training set
+            # Train the decision tree on the training folds
             decision_tree_classifier.fit(x_train, y_train)
 
-            # Predict labels on the validation set
+            # Predict labels on the validation fold
             predictions = decision_tree_classifier.predict(x_val)
 
             # Compute the accuracy for the current fold

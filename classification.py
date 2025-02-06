@@ -88,17 +88,14 @@ class DecisionTreeClassifier:
         The information entropy of the given dataset.
         """
 
-        # Initialise entropy to 0
         entropy = 0
 
-        # Count the occurences of each unique label
+        # Count the occurrences of each unique label
         [_, count] = np.unique(labels, return_counts=True)
 
         # Calculate entropy based on label proportions
         for i in count:
-            # Proportion of each class
             proportion = i / len(labels)
-            # Update entropy using the formula
             entropy -= proportion * math.log2(proportion)
 
         return entropy
@@ -117,10 +114,8 @@ class DecisionTreeClassifier:
         The information gain of a given splitting.
         """
 
-        # Total number of samples in the original dataset
         len_before = len(y)
 
-        # Number of samples in the left and right subsets
         len_left = len(y_left)
         len_right = len(y_right)
 
@@ -175,14 +170,13 @@ class DecisionTreeClassifier:
                 # Calculate the information entropy gain for each possible splitting
                 entropy_gain = self.information_gain(y, y[left_mask], y[right_mask])
 
-                # Keep track of the best splitting
                 # Update the best split if the current split has higher information gain
                 if entropy_gain > best_gain and entropy_gain > self.min_impurity_decrease:
                     best_gain = entropy_gain
                     best_feature = feature
                     best_threshold = threshold
 
-        # print(f"Best gain found: {best_gain}")
+        # print(f"Best gain found: {best_gain}") <- debugging statement
         return best_feature, best_threshold
 
 
@@ -196,7 +190,7 @@ class DecisionTreeClassifier:
             # Return a node with the mode class as its label
             unique_labels, y_int = np.unique(y, return_inverse=True)
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
-            # print(f"Creating leaf node at depth {depth} with label {most_common_label}")
+            # print(f"Creating leaf node at depth {depth} with label {most_common_label}") <- debugging statement
             self.num_leaves += 1
             return Node(label=most_common_label)
 
@@ -209,14 +203,12 @@ class DecisionTreeClassifier:
             most_common_label = unique_labels[np.argmax(np.bincount(y_int))]
             self.num_leaves += 1
             return Node(label=most_common_label)
-            #return Node(label=np.argmax(np.bincount(y)))
 
         # Split the current dataset in the left and right subsets
         left_mask = x[:, feature] <= threshold
         right_mask = ~left_mask
         x_left, y_left = x[left_mask], y[left_mask]
         x_right, y_right = x[right_mask], y[right_mask]
-
 
         # Create the left and right subtrees recursively
         left_subtree = self.build_tree(x_left, y_left, depth + 1)
