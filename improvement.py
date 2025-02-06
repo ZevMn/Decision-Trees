@@ -13,7 +13,7 @@ import itertools
 from classification import DecisionTreeClassifier
 from kfold import kfold
 
-def train_and_predict(x_train, y_train, x_test, x_val, y_val):
+def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
     """ Interface to train and test the new/improved decision tree.
 
     This function is an interface for training and testing the new/improved
@@ -44,7 +44,7 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val):
 
     (best_accuracy,
      best_combination,
-     gridsearch_optimised_tree) = grid_search(x_train, y_train)
+     gridsearch_optimised_tree) = grid_search(x_train, y_train, n_folds)
 
     return gridsearch_optimised_tree.predict(x_test)
 

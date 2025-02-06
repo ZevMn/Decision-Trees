@@ -8,8 +8,7 @@ from itertools import accumulate
 import numpy as np
 from classification import DecisionTreeClassifier
 from evaluation import Evaluation
-from improvement import improvement
-#from improvement import train_and_predict
+from improvement import train_and_predict
 from read_data import read_dataset, display_barcharts, different_labels
 from kfold import kfold
 
@@ -157,5 +156,4 @@ if __name__ == "__main__":
     print("-----------------------------------")
 
     print("Performing k-fold cross-validation on the full dataset...")
-    kfold_validator = improvement(x_full, y_full, n_folds=10)
-    kfold_validator.grid_search(x_full, y_full, n_folds=10)
+    kfold_validator = train_and_predict(x_full, y_full, x_val, y_val, n_folds=10)
