@@ -3,14 +3,14 @@
 # Coursework 1 example execution code
 # Prepared by: Josiah Wang
 ##############################################################################
-from itertools import accumulate
 
 import numpy as np
+
 from classification import DecisionTreeClassifier
 from evaluation import Evaluation
 from improvement import train_and_predict
+from kfold import majority_vote, k_fold_train_and_evaluation
 from read_data import read_dataset, display_barcharts, different_labels
-from kfold import kfold
 
 if __name__ == "__main__":
 
@@ -102,19 +102,18 @@ if __name__ == "__main__":
     print("-----------------------------------------------------------------")
 
     # Performing K-fold cross-validation
-    kfold_validator = kfold()
 
     print("\nPerforming k-fold cross-validation on full dataset:")
-    avg_acc_full, std_dev_full, full_trees = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
+    avg_acc_full, std_dev_full, full_trees = k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
 
     '''Performing k-fold cross-validation on the subset and noisy datasets:'''
     # print("\nPerforming k-fold cross-validation on subset dataset:")
-    # avg_acc_sub, std_dev_sub, sub_trees = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
+    # avg_acc_sub, std_dev_sub, sub_trees = k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
     # print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
     #
     # print("\nPerforming k-fold cross-validation on noisy dataset:")
-    # avg_acc_noisy, std_dev_noisy, noisy_trees = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
+    # avg_acc_noisy, std_dev_noisy, noisy_trees = k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
     # print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
 
     """
@@ -136,7 +135,7 @@ if __name__ == "__main__":
     test_predictions = np.array(test_predictions) # Convert to numpy array
 
     # Use majority voting to combine predictions
-    majority_predictions = kfold_validator.majority_vote(test_predictions)
+    majority_predictions = majority_vote(test_predictions)
 
     # Calculate and print the final accuracy
     ensemble_accuracy = np.mean(majority_predictions == y_test)

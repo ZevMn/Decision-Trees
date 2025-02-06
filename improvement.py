@@ -11,7 +11,8 @@ import numpy as np
 import itertools
 
 from classification import DecisionTreeClassifier
-from kfold import kfold
+from kfold import k_fold_split
+
 
 def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
     """ Interface to train and test the new/improved decision tree.
@@ -98,8 +99,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
 def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng()):
 
     # Split the dataset into k splits of indices
-    kfold_object = kfold()
-    split_indices = kfold_object.k_fold_split(n_instances, n_folds, random_generator=random_generator)
+    split_indices = k_fold_split(n_instances, n_folds, random_generator=random_generator)
 
     folds = []
     # Iterate through the folds each time selecting one as the test set and the rest for training
