@@ -8,7 +8,7 @@ class kfold(object):
     def __init__(self):
         pass
 
-    def k_fold_split(self,n_instances, n_folds=10, random_generator=np.random.default_rng()):
+    def k_fold_split(self, n_instances, n_folds=10, random_generator=np.random.default_rng()):
         """
         Splits dataset indices into k folds using random shuffling.
 

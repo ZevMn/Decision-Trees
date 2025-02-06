@@ -58,7 +58,8 @@ class improvement:
     def train_val_test_k_fold(self, n_instances, n_folds=10, random_generator=np.random.default_rng()):
 
         # Split the dataset into k splits of indices
-        split_indices = kfold.k_fold_split(n_instances, n_folds, random_generator)
+        kfold_object = kfold()
+        split_indices = kfold_object.k_fold_split(n_instances, n_folds, random_generator=random_generator)
 
         folds = []
         # Iterate through the folds each time selecting one as the test set and the rest for training
@@ -68,7 +69,7 @@ class improvement:
             val_indices = split_indices[(k + 1) % n_folds]
 
             # Concatenate remaining folds for training
-            train_indices = np.zeros((0,), dtype=np.int)
+            train_indices = np.zeros((0,), dtype=int)
             for i in range(n_folds):
                 if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
                     train_indices = np.hstack([train_indices, split_indices[i]])
