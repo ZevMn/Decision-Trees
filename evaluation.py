@@ -65,72 +65,89 @@ class Evaluation(object):
         except ZeroDivisionError:
             return 0.
 
-    def precision(self, y_gold, y_prediction):
+    # To check accuracy is correct:
+    def accuracy_from_confusion(self, confusion):
+        """ Compute the accuracy given the confusion matrix
+
+        Args:
+            confusion (np.ndarray): shape (C, C), where C is the number of classes.
+                        Rows are ground truth per class, columns are predictions
+
+        Returns:
+            float : the accuracy
+        """
+
+        if np.sum(confusion) > 0:
+            return np.sum(np.diag(confusion)) / np.sum(confusion)
+        else:
+            return 0.
+
+    def precision(self, confusion):
         """
         Compute precision for each class and the macro-averaged precision.
 
         Args:
-            y_gold (np.array): Ground truth labels.
-            y_prediction (np.array): Predicted labels.
+            confusuion (np.ndarray): shape (C, C), where C is the number of classes.
+                        Rows are ground truth per class, columns are predictions
 
         Returns:
             tuple: (precision per class, macro-averaged precision).
         """
-        confusion = self.confusion_matrix(y_gold, y_prediction)
-        p = np.zeros((len(confusion),))
+
+        precisions = np.zeros((len(confusion),))
         for c in range(confusion.shape[0]):
             if np.sum(confusion[:, c]) > 0:
-                p[c] = confusion[c, c] / np.sum(confusion[:, c])
+                precisions[c] = confusion[c, c] / np.sum(confusion[:, c])
 
         # Compute the macro-averaged precision
-        macro_p = np.mean(p) if len(p) > 0 else 0.
-        return (p, macro_p)
+        macro_precision = np.mean(precisions) if len(precisions) > 0 else 0.
+        return (precisions, macro_precision)
 
-    def recall(self, y_gold, y_prediction):
+    def recall(self, confusion):
         """
         Compute recall for each class and the macro-averaged recall.
 
         Args:
-            y_gold (np.array): Ground truth labels.
-            y_prediction (np.array): Predicted labels.
+            confusuion (np.ndarray): shape (C, C), where C is the number of classes.
+                        Rows are ground truth per class, columns are predictions
 
         Returns:
             tuple: (recall per class, macro-averaged recall).
         """
-        confusion = self.confusion_matrix(y_gold, y_prediction)
-        r = np.zeros((len(confusion),))
+
+        recalls = np.zeros((len(confusion),))
         for c in range(confusion.shape[0]):
             if np.sum(confusion[c, :]) > 0:
-                r[c] = confusion[c, c] / np.sum(confusion[c, :])
+                recalls[c] = confusion[c, c] / np.sum(confusion[c, :])
 
         # Compute the macro-averaged recall
-        macro_r = np.mean(r) if len(r) > 0 else 0.
-        return (r, macro_r)
+        macro_recall = np.mean(recalls) if len(recalls) > 0 else 0.
+        return (recalls, macro_recall)
 
-    def f1_score(self, y_gold, y_prediction):
+    def f1_score(self, confusion):
         """
         Compute F1 score for each class and the macro-averaged F1 score.
 
         Args:
-            y_gold (np.array): Ground truth labels.
-            y_prediction (np.array): Predicted labels.
+            confusuion (np.ndarray): shape (C, C), where C is the number of classes.
+                        Rows are ground truth per class, columns are predictions
 
         Returns:
             tuple: (F1 score per class, macro-averaged F1 score).
         """
-        (precisions, macro_p) = self.precision(y_gold, y_prediction)
-        (recalls, macro_r) = self.recall(y_gold, y_prediction)
+        (precisions, macro_precision) = self.precision(confusion)
+        (recalls, macro_recall) = self.recall(confusion)
 
-        assert len(precisions) == len(recalls)
+        assert len(precisions) == len(recalls) # Sanity check
 
-        f = np.zeros((len(precisions),))
-        for c, (p, r) in enumerate(zip(precisions, recalls)):
-            if p + r > 0:
-                f[c] = 2 * p * r / (p + r)
+        f1_scores = np.zeros((len(precisions),))
+        for c, (precision, recall) in enumerate(zip(precisions, recalls)):
+            if precision + recall > 0:
+                f1_scores[c] = 2 * precision * recall / (precision + recall)
 
         # Compute the macro-averaged F1 score
-        macro_f = np.mean(f) if len(f) > 0 else 0.
-        return (f, macro_f)
+        macro_f1_score = np.mean(f1_scores) if len(f1_scores) > 0 else 0.
+        return (f1_scores, macro_f1_score)
 
     def plot_confusion_matrix(self, confusion, class_labels, title="Confusion Matrix"):
         """
@@ -155,13 +172,15 @@ class Evaluation(object):
         plt.ylabel("Actual")
         plt.show()
 
-    def plot_metrics(self, y_gold, y_prediction, class_labels=None, title="Precision, Recall, and F1 Score per Class"):
+    def plot_metrics(self, y_gold, y_prediction, confusion, class_labels=None, title="Precision, Recall, and F1 Score per Class"):
         """
         Plot precision, recall, and F1 score for each class.
 
         Args:
             y_gold (np.array): Ground truth labels.
             y_prediction (np.array): Predicted labels.
+            confusuion (np.ndarray): shape (C, C), where C is the number of classes.
+                        Rows are ground truth per class, columns are predictions
             class_labels (np.array, optional): List of class labels. If None, inferred from y_gold and y_prediction.
             title (str, optional): Title of the plot.
         """
@@ -169,9 +188,9 @@ class Evaluation(object):
             class_labels = np.unique(np.concatenate((y_gold, y_prediction)))
 
         # Compute metrics
-        (precisions, macro_p) = self.precision(y_gold, y_prediction)
-        (recalls, macro_r) = self.recall(y_gold, y_prediction)
-        (f1_scores, macro_f) = self.f1_score(y_gold, y_prediction)
+        (precisions, macro_precision) = self.precision(confusion)
+        (recalls, macro_recall) = self.recall(confusion)
+        (f1_scores, macro_f1_score) = self.f1_score(confusion)
 
         # Plot metrics
         metrics = {
@@ -209,20 +228,26 @@ class Evaluation(object):
 
         confusion = self.confusion_matrix(y_gold, y_prediction, class_labels)
         accuracy = self.accuracy(y_gold, y_prediction)
-        precision = self.precision(y_gold, y_prediction)
-        recall = self.recall(y_gold, y_prediction)
-        f1_score = self.f1_score(y_gold, y_prediction)
+        precisions, macro_precision = self.precision(confusion)
+        recalls, macro_recall = self.recall(confusion)
+        f1_scores, macro_f1_score = self.f1_score(confusion)
 
-        print("Confusion Matrix:")
-        print(confusion)
+        second_accuracy_calc = self.accuracy_from_confusion(confusion)
+        assert accuracy == second_accuracy_calc # Sanity check
+
+        print("Confusion Matrix: ", confusion)
         print("Accuracy: ", accuracy)
-        print("Precision: ", precision)
-        print("Recall: ", recall)
-        print("F1 Score: ", f1_score)
+        print("Accuracy (confusion calculation): ", second_accuracy_calc)
+        print("Precisions: ", precisions)
+        print("Macro-averaged precision: ", precisions)
+        print("Recalls: ", recalls)
+        print("Macro-averaged recall: ", macro_recall)
+        print("F1 Score: ", f1_scores)
+        print("Macro-averaged F1 Score: ", macro_f1_score)
 
 
         # Plot confusion matrix and metrics
         self.plot_confusion_matrix(confusion, class_labels, title)
-        self.plot_metrics(y_gold, y_prediction, class_labels, title)
+        self.plot_metrics(y_gold, y_prediction, confusion, class_labels, title)
 
-        return confusion, accuracy, precision, recall, f1_score
+        return
