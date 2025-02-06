@@ -8,6 +8,7 @@
 ##############################################################################
 
 import numpy as np
+import itertools
 
 from classification import DecisionTreeClassifier
 from kfold import kfold
@@ -63,75 +64,54 @@ class improvement:
         best_min_sample_split = 0
         best_min_impurity_decrease = 0
 
-        # Iterate through each set of folds
-        for i, (train_indices, val_indices, test_indices) in enumerate(
-                self.train_val_test_k_fold(len(x), n_folds, random_generator)):
-            # Set up the dataset for the current fold
-            x_train = x[train_indices, :]
-            y_train = y[train_indices]
-            x_val = x[val_indices, :]
-            y_val = y[val_indices]
-            x_test = x[test_indices, :]
-            y_test = y[test_indices]
+        # Perform grid search, i.e.
+        # evaluate DecisionTreeClassifier for max_depth, min_sample_split, min_impurity_decrease
+        # and store the accuracy and classifier for each max_depth
 
-            # Perform grid search, i.e.
-            # evaluate DecisionTreeClassifier for max_depth, min_sample_split, min_impurity_decrease
-            # and store the accuracy and classifier for each max_depth
+        max_depths = [None, 5, 10, 15, 20]
+        min_sample_splits = range(1, 20)
+        min_impurity_decreases = range(0.01, 0.5, 0.01)
+        param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
-            # Grid search for max_depth
-            gridsearch_accuracies = []
-            for max_depth in [None, 5, 10, 15, 20]:  # Avoid using None
-                decision_tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
+        # Grid search for all combinations of parameters
+        gridsearch_accuracies = []
+        for combination in param_combinations:
+            decision_tree_classifier = DecisionTreeClassifier(
+                max_depth=combination[0],
+                min_sample_split=combination[1],
+                min_impurity_decrease=combination[2]
+            )
+
+            # Iterate through each set of folds
+            for i, (train_indices, val_indices, test_indices) in enumerate(
+                    self.train_val_test_k_fold(len(x), n_folds, random_generator)):
+                # Set up the dataset for the current fold
+                x_train = x[train_indices, :]
+                y_train = y[train_indices]
+                x_val = x[val_indices, :]
+                y_val = y[val_indices]
+                x_test = x[test_indices, :]
+                y_test = y[test_indices]
+
                 decision_tree_classifier.fit(x_train, y_train)
                 predictions = decision_tree_classifier.predict(x_val)
                 current_accuracy = np.mean(predictions == y_val)
-                gridsearch_accuracies.append((current_accuracy, max_depth, decision_tree_classifier))
+                gridsearch_accuracies.append((current_accuracy, combination, decision_tree_classifier))
 
-            # Select the classifier with the highest accuracy
-            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-            (best_accuracy, best_max_depth, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
+                # Select the classifier with the highest accuracy
+                # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+                (best_accuracy, best_combination, best_classifier) = max(gridsearch_accuracies,
+                                                                                   key=lambda param: param[0])
 
-            # Grid search for min_sample_split
-            gridsearch_accuracies = []
-            for min_sample_split in np.arange(1, 50, 2):
-                decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth,
-                                                                  min_sample_split=min_sample_split)
-                decision_tree_classifier.fit(x_train, y_train)
-                predictions = decision_tree_classifier.predict(x_val)
-                current_accuracy = np.mean(predictions == y_val)
-                gridsearch_accuracies.append((current_accuracy, min_sample_split, decision_tree_classifier))
+        print("\nBest accuracy for current fold: ", best_accuracy)
+        print("Best max_depth: ", best_combination[0])
+        print("Best min_sample_split: ", best_combination[1])
+        print("Best min_impurity_decrease: ", best_combination[2])
 
-            # Select the classifier with the highest accuracy
-            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-            (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
-
-            # Grid search for min_impurity_decrease
-            gridsearch_accuracies = []
-            for min_impurity_decrease in reversed(np.arange(0.01, 0.5, 0.1)):  # Start from 0.01
-                decision_tree_classifier = DecisionTreeClassifier(
-                    max_depth=best_max_depth,
-                    min_sample_split=best_min_sample_split,
-                    min_impurity_decrease=min_impurity_decrease
-                )
-                decision_tree_classifier.fit(x_train, y_train)
-                predictions = decision_tree_classifier.predict(x_val)
-                current_accuracy = np.mean(predictions == y_val)
-                gridsearch_accuracies.append((current_accuracy, min_impurity_decrease, decision_tree_classifier))
-
-            # Select the classifier with the highest accuracy
-            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-            (best_accuracy, best_min_impurity_decrease, best_classifier) = max(gridsearch_accuracies,
-                                                                          key=lambda param: param[0])
-
-            print("\nBest accuracy for current fold: ", best_accuracy)
-            print("Best max_depth: ", best_max_depth)
-            print("Best min_sample_split: ", best_min_sample_split)
-            print("Best min_impurity_decrease: ", best_min_impurity_decrease)
-
-            # Finally, evaluate this classifier on x_test
-            predictions = best_classifier.predict(x_test)
-            final_accuracy = np.mean(predictions == y_test)
-            accuracies[i] = final_accuracy
+        # Finally, evaluate this classifier on x_test
+        predictions = best_classifier.predict(x_test)
+        final_accuracy = np.mean(predictions == y_test)
+        accuracies[i] = final_accuracy
 
         print("Final accuracies: ", accuracies)
         print("Mean: ", np.mean(accuracies))
@@ -161,3 +141,18 @@ class improvement:
             folds.append([train_indices, val_indices, test_indices])
 
         return folds
+
+
+def cartesian_product_matrix(list1, list2, list3):
+    """
+    Returns a matrix where each row represents an element of the Cartesian product
+    of the three input lists.
+
+    Parameters:
+    - list1, list2, list3: Input lists.
+
+    Returns:
+    - A NumPy array where each row is a combination from the Cartesian product.
+    """
+    product = list(itertools.product(list1, list2, list3))
+    return np.array(product)
