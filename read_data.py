@@ -97,6 +97,8 @@ def display_barcharts(y1, y2, classes, legend1, legend2):
     plt.tight_layout()
     plt.show()
 
+    return
+
 
 def different_labels(x_full, y_full, x_noisy, y_noisy, classes):
 
@@ -113,3 +115,5 @@ def different_labels(x_full, y_full, x_noisy, y_noisy, classes):
     print(f"\nProportion of changed labels: {proportion_changed:.4f} ({num_changed} out of {total_labels})")
 
     display_barcharts(y_full_sorted, y_noisy_sorted, classes, "train_full.txt", "train_noisy.txt")
+
+    return
