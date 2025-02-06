@@ -10,6 +10,7 @@
 import numpy as np
 
 from classification import DecisionTreeClassifier
+from kfold import kfold
 
 
 def train_and_predict(x_train, y_train, x_test, x_val, y_val):
@@ -80,19 +81,25 @@ def optimise_parameters(x_train, y_train, x_val, y_val):
 
     return best_params
 
-def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
-    shuffled_indices = random_generator.permutation(n_folds)
-    fold_splits = np.array_split(shuffled_indices, n_folds)
-    folds = []
+def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng()):
 
+    # Split the dataset into k splits of indices
+    split_indices = kfold.k_fold_split(n_instances, n_folds, random_generator)
+
+    folds = []
+    # Iterate through the folds each time selecting one as the test set and the rest for training
     for k in range(n_folds):
-        test_indices = fold_splits[k]
-        remaining_folds = [fold_splits[i] for i in range(n_folds) if i != k ]
-        # First remaining split as validation set
-        val_indices = remaining_folds[0]
-        # Exclude the val and test indices
-        train_indices = np.hstack(remaining_folds[1])
-        folds.append((train_indices, val_indices, test_indices))
+        # Select k as the test set, and k+1 as validation (or 0 if k is the final split)
+        test_indices = split_indices[k]
+        val_indices = split_indices[(k + 1) % n_folds]
+
+        # Concatenate remaining folds for training
+        train_indices = np.zeros((0,), dtype=np.int)
+        for i in range(n_folds):
+            if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
+                train_indices = np.hstack([train_indices, split_indices[i]])
+
+        folds.append([train_indices, val_indices, test_indices])
 
     return folds
 

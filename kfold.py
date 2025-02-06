@@ -45,7 +45,7 @@ class kfold(object):
         folds = []
         # Iterate through the folds each time selecting one as the test set and the rest for training
         for k in range(n_folds):
-            # Select the current fold to be the test set
+            # Select the current fold as the test set
             test_indices = split_indices[k]
 
             # Combine all other folds for training
