@@ -75,33 +75,37 @@ class improvement:
             # evaluate DecisionTreeClassifier for max_depth, min_sample_split, min_impurity_decrease
             # and store the accuracy and classifier for each max_depth
 
+            # Grid search for max_depth
             gridsearch_accuracies = []
-            for max_depth in [None, 1, 5, 10]:
+            for max_depth in [5, 10, 15, 20, 25, 30]:  # Avoid using None
                 decision_tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
                 decision_tree_classifier.fit(x_train, y_train)
                 predictions = decision_tree_classifier.predict(x_val)
                 current_accuracy = np.mean(predictions == y_val)
                 gridsearch_accuracies.append((current_accuracy, max_depth, decision_tree_classifier))
 
-            # Select the classifier with the highest accuracy
-            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-            (best_accuracy, best_max_depth, best_classifier) = max(gridsearch_accuracies, key=lambda param:param[0])
+            # Sort by accuracy first, then by hyperparameter in ascending order
+            best_accuracy, best_max_depth, best_classifier = sorted(
+                gridsearch_accuracies, key=lambda param: (-param[0], -param[1])
+            )[0]
 
-            # Now using this max_depth, perform grid search to optimise min_sample_split
-            gridsearch_accuracies = []  # Reset
-            for min_sample_split in range(10):
-                decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth, min_sample_split=min_sample_split)
+            # Grid search for min_sample_split
+            gridsearch_accuracies = []
+            for min_sample_split in range(2, 20):
+                decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth,
+                                                                  min_sample_split=min_sample_split)
                 decision_tree_classifier.fit(x_train, y_train)
                 predictions = decision_tree_classifier.predict(x_val)
                 current_accuracy = np.mean(predictions == y_val)
                 gridsearch_accuracies.append((current_accuracy, min_sample_split, decision_tree_classifier))
 
-            # Again, select the classifier with the highest accuracy
-            (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
+            best_accuracy, best_min_sample_split, best_classifier = sorted(
+                gridsearch_accuracies, key=lambda param: (-param[0], -param[1])
+            )[0]
 
-            # Now using this max_depth and min_sample_split, perform grid search to optimise min_entropy_decrease
-            gridsearch_accuracies = [] # Reset
-            for min_impurity_decrease in np.arange(0, 1, 0.1):
+            # Grid search for min_impurity_decrease
+            gridsearch_accuracies = []
+            for min_impurity_decrease in np.arange(0.01, 0.5, 0.1):  # Start from 0.01
                 decision_tree_classifier = DecisionTreeClassifier(
                     max_depth=best_max_depth,
                     min_sample_split=best_min_sample_split,
@@ -112,8 +116,9 @@ class improvement:
                 current_accuracy = np.mean(predictions == y_val)
                 gridsearch_accuracies.append((current_accuracy, min_impurity_decrease, decision_tree_classifier))
 
-            # Again, select the classifier with the highest accuracy
-            (best_accuracy, best_min_impurity_decrease, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
+            best_accuracy, best_min_impurity_decrease, best_classifier = sorted(
+                gridsearch_accuracies, key=lambda param: (-param[0], -param[1])
+            )[0]
 
             print("\nBest accuracy for current fold: ", best_accuracy)
             print("Best max_depth: ", best_max_depth)
@@ -122,7 +127,7 @@ class improvement:
 
             # Finally, evaluate this classifier on x_test
             predictions = best_classifier.predict(x_test)
-            final_accuracy = np.mean(predictions == y_val)
+            final_accuracy = np.mean(predictions == y_test)
             accuracies[i] = final_accuracy
 
         print("Final accuracies: ", accuracies)
