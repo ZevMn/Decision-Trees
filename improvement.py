@@ -8,6 +8,7 @@
 ##############################################################################
 
 import numpy as np
+from pyparsing import nested_expr
 
 from classification import DecisionTreeClassifier
 from kfold import kfold
@@ -19,64 +20,41 @@ class improvement:
         self.n_folds = n_folds
         return
 
-    # def train_and_predict(self, x, y, n_folds):
-    #     """ Interface to train and test the new/improved decision tree.
-    #
-    #     This function is an interface for training and testing the new/improved
-    #     decision tree classifier.
-    #
-    #     x_train and y_train should be used to train your classifier, while
-    #     x_test should be used to test your classifier.
-    #     x_val and y_val may optionally be used as the validation dataset.
-    #     You can just ignore x_val and y_val if you do not need a validation dataset.
-    #
-    #     Args:
-    #     x_train (numpy.ndarray): Training instances, numpy array of shape (N, K)
-    #                        N is the number of instances
-    #                        K is the number of attributes
-    #     y_train (numpy.ndarray): Class labels, numpy array of shape (N, )
-    #                        Each element in y is a str
-    #     x_test (numpy.ndarray): Test instances, numpy array of shape (M, K)
-    #                             M is the number of test instances
-    #                             K is the number of attributes
-    #     x_val (numpy.ndarray): Validation instances, numpy array of shape (L, K)
-    #                        L is the number of validation instances
-    #                        K is the number of attributes
-    #     y_val (numpy.ndarray): Class labels of validation set, numpy array of shape (L, )
-    #
-    #     Returns:
-    #     numpy.ndarray: A numpy array of shape (M, ) containing the predicted class label for each instance in x_test
-    #     """
-    #
-    #     # Perform grid search to find the best parameters
-    #     optimised_classifier = self.grid_search(x, y, n_folds)
-    #
-    #     # Make predictions on x_test
-    #     predictions = optimised_classifier.predict(x_test)
-    #     return predictions
+    def train_and_predict(self, x_train, y_train, x_test, x_val, y_val):
+        """ Interface to train and test the new/improved decision tree.
 
-    def train_val_test_k_fold(self, n_instances, n_folds=10, random_generator=np.random.default_rng()):
+        This function is an interface for training and testing the new/improved
+        decision tree classifier.
 
-        # Split the dataset into k splits of indices
-        kfold_object = kfold()
-        split_indices = kfold_object.k_fold_split(n_instances, n_folds, random_generator=random_generator)
+        x_train and y_train should be used to train your classifier, while
+        x_test should be used to test your classifier.
+        x_val and y_val may optionally be used as the validation dataset.
+        You can just ignore x_val and y_val if you do not need a validation dataset.
 
-        folds = []
-        # Iterate through the folds each time selecting one as the test set and the rest for training
-        for k in range(n_folds):
-            # Select k as the test set, and k+1 as validation (or 0 if k is the final split)
-            test_indices = split_indices[k]
-            val_indices = split_indices[(k + 1) % n_folds]
+        Args:
+        x_train (numpy.ndarray): Training instances, numpy array of shape (N, K)
+                           N is the number of instances
+                           K is the number of attributes
+        y_train (numpy.ndarray): Class labels, numpy array of shape (N, )
+                           Each element in y is a str
+        x_test (numpy.ndarray): Test instances, numpy array of shape (M, K)
+                                M is the number of test instances
+                                K is the number of attributes
+        x_val (numpy.ndarray): Validation instances, numpy array of shape (L, K)
+                           L is the number of validation instances
+                           K is the number of attributes
+        y_val (numpy.ndarray): Class labels of validation set, numpy array of shape (L, )
 
-            # Concatenate remaining folds for training
-            train_indices = np.zeros((0,), dtype=int)
-            for i in range(n_folds):
-                if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
-                    train_indices = np.hstack([train_indices, split_indices[i]])
+        Returns:
+        numpy.ndarray: A numpy array of shape (M, ) containing the predicted class label for each instance in x_test
+        """
 
-            folds.append([train_indices, val_indices, test_indices])
+        (best_max_depth,
+         best_min_sample_split,
+         best_min_impurity_decrease,
+         gridsearch_optimised_tree) = self.grid_search(x_train, y_train)
 
-        return folds
+        return gridsearch_optimised_tree.predict(x_test)
 
     def grid_search(self, x, y, n_folds=10, random_generator=np.random.default_rng()):
 
@@ -152,3 +130,26 @@ class improvement:
         print("Standard deviation: ", np.std(accuracies))
 
         return best_max_depth, best_min_sample_split, best_min_impurity_decrease, best_classifier
+
+    def train_val_test_k_fold(self, n_instances, n_folds=10, random_generator=np.random.default_rng()):
+
+        # Split the dataset into k splits of indices
+        kfold_object = kfold()
+        split_indices = kfold_object.k_fold_split(n_instances, n_folds, random_generator=random_generator)
+
+        folds = []
+        # Iterate through the folds each time selecting one as the test set and the rest for training
+        for k in range(n_folds):
+            # Select k as the test set, and k+1 as validation (or 0 if k is the final split)
+            test_indices = split_indices[k]
+            val_indices = split_indices[(k + 1) % n_folds]
+
+            # Concatenate remaining folds for training
+            train_indices = np.zeros((0,), dtype=int)
+            for i in range(n_folds):
+                if i not in [k, (k + 1) % n_folds]: # Concatenate to training set if not validation or test
+                    train_indices = np.hstack([train_indices, split_indices[i]])
+
+            folds.append([train_indices, val_indices, test_indices])
+
+        return folds

@@ -105,10 +105,6 @@ if __name__ == "__main__":
     # Performing K-fold cross-validation
     kfold_validator = kfold()
 
-    # Include the validation set in all future training
-    x_full = np.concatenate((x_full, x_val), axis=0)
-    y_full = np.concatenate((y_full, y_val), axis=0)
-
     print("\nPerforming k-fold cross-validation on full dataset:")
     avg_acc_full, std_dev_full, full_trees = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
