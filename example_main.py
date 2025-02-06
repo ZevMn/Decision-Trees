@@ -108,7 +108,7 @@ if __name__ == "__main__":
     avg_acc_full, std_dev_full, full_tree = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
 
-    '''Performing 10-fold cross-validation on the subset and noisy datasets:'''
+    '''Performing k-fold cross-validation on the subset and noisy datasets:'''
     # print("\nPerforming k-fold cross-validation on subset dataset:")
     # avg_acc_sub, std_dev_sub, sub_tree = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
     # print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
@@ -124,7 +124,7 @@ if __name__ == "__main__":
     """
 
     print("\n--------------------------------------------------------")
-    print("PART 3.2: COMBINING THE PREDICTIONS USING MAJORITY VOTING")
+    print("PART 3.3: COMBINING THE PREDICTIONS USING MAJORITY VOTING")
     print("---------------------------------------------------------")
 
     print("\nPerforming majority voting on test set...")
