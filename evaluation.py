@@ -27,7 +27,7 @@ class Evaluation(object):
         if class_labels is None:
             class_labels = np.unique(np.concatenate((y_gold, y_prediction)))
 
-        confusion = np.zeros((len(class_labels), len(class_labels)))
+        confusion = np.zeros((len(class_labels), len(class_labels)), dtype=int)
 
         # For each correct class (row),
         # compute how many instances are predicted for each class (columns)
