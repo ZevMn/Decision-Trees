@@ -47,7 +47,15 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
      best_combination,
      gridsearch_optimised_tree) = grid_search(x_train, y_train, n_folds)
 
-    return gridsearch_optimised_tree.predict(x_test)
+    improved_tree = DecisionTreeClassifier()
+    improved_tree.fit(x_train,
+                      y_train,
+                      max_depth=best_combination[0],
+                      min_sample_split=best_combination[1],
+                      min_impurity_decrease=best_combination[2]
+                      )
+
+    return improved_tree.predict(x_test)
 
 def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
 
