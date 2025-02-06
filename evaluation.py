@@ -239,7 +239,7 @@ class Evaluation(object):
         print("Accuracy: ", accuracy)
         print("Accuracy (confusion calculation): ", second_accuracy_calc)
         print("Precisions: ", precisions)
-        print("Macro-averaged precision: ", precisions)
+        print("Macro-averaged precision: ", macro_precision)
         print("Recalls: ", recalls)
         print("Macro-averaged recall: ", macro_recall)
         print("F1 Score: ", f1_scores)
