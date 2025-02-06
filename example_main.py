@@ -105,17 +105,21 @@ if __name__ == "__main__":
     # Performing K-fold cross-validation
     kfold_validator = kfold()
 
+    # Include the validation set in all future training
+    x_full = np.hstack((x_full, x_val))
+    y_full = np.hstack((y_full, y_val))
+
     print("\nPerforming k-fold cross-validation on full dataset:")
-    avg_acc_full, std_dev_full, full_tree = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
+    avg_acc_full, std_dev_full, full_trees = kfold_validator.k_fold_train_and_evaluation(x_full, y_full, n_folds=10)
     print(f"Avg Accuracy (Full): {avg_acc_full:.4f}, Std Dev: {std_dev_full:.4f}")
 
     '''Performing k-fold cross-validation on the subset and noisy datasets:'''
     # print("\nPerforming k-fold cross-validation on subset dataset:")
-    # avg_acc_sub, std_dev_sub, sub_tree = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
+    # avg_acc_sub, std_dev_sub, sub_trees = kfold_validator.k_fold_train_and_evaluation(x_sub, y_sub, n_folds=10)
     # print(f"Avg Accuracy (Subset): {avg_acc_sub:.4f}, Std Dev: {std_dev_sub:.4f}")
     #
     # print("\nPerforming k-fold cross-validation on noisy dataset:")
-    # avg_acc_noisy, std_dev_noisy, noisy_tree = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
+    # avg_acc_noisy, std_dev_noisy, noisy_trees = kfold_validator.k_fold_train_and_evaluation(x_noisy, y_noisy, n_folds=10)
     # print(f"Avg Accuracy (Noisy): {avg_acc_noisy:.4f}, Std Dev: {std_dev_noisy:.4f}")
 
     """
@@ -132,7 +136,7 @@ if __name__ == "__main__":
 
     # Make predictions on the test set
     test_predictions = []
-    for tree in full_tree:
+    for tree in full_trees:
         test_predictions.append(tree.predict(x_test))
     test_predictions = np.array(test_predictions) # Convert to numpy array
 
