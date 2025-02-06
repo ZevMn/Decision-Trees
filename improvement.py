@@ -8,7 +8,6 @@
 ##############################################################################
 
 import numpy as np
-from pyparsing import nested_expr
 
 from classification import DecisionTreeClassifier
 from kfold import kfold
@@ -77,21 +76,20 @@ class improvement:
 
             # Grid search for max_depth
             gridsearch_accuracies = []
-            for max_depth in [5, 10, 15, 20, 25, 30]:  # Avoid using None
+            for max_depth in [10, 5, 1, None]:  # Avoid using None
                 decision_tree_classifier = DecisionTreeClassifier(max_depth=max_depth)
                 decision_tree_classifier.fit(x_train, y_train)
                 predictions = decision_tree_classifier.predict(x_val)
                 current_accuracy = np.mean(predictions == y_val)
                 gridsearch_accuracies.append((current_accuracy, max_depth, decision_tree_classifier))
 
-            # Sort by accuracy first, then by hyperparameter in ascending order
-            best_accuracy, best_max_depth, best_classifier = sorted(
-                gridsearch_accuracies, key=lambda param: (-param[0], -param[1])
-            )[0]
+            # Select the classifier with the highest accuracy
+            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+            (best_accuracy, best_max_depth, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
 
             # Grid search for min_sample_split
             gridsearch_accuracies = []
-            for min_sample_split in range(2, 20):
+            for min_sample_split in reversed(range(2, 20)):
                 decision_tree_classifier = DecisionTreeClassifier(max_depth=best_max_depth,
                                                                   min_sample_split=min_sample_split)
                 decision_tree_classifier.fit(x_train, y_train)
@@ -99,13 +97,13 @@ class improvement:
                 current_accuracy = np.mean(predictions == y_val)
                 gridsearch_accuracies.append((current_accuracy, min_sample_split, decision_tree_classifier))
 
-            best_accuracy, best_min_sample_split, best_classifier = sorted(
-                gridsearch_accuracies, key=lambda param: (-param[0], -param[1])
-            )[0]
+            # Select the classifier with the highest accuracy
+            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+            (best_accuracy, best_min_sample_split, best_classifier) = max(gridsearch_accuracies, key=lambda param: param[0])
 
             # Grid search for min_impurity_decrease
             gridsearch_accuracies = []
-            for min_impurity_decrease in np.arange(0.01, 0.5, 0.1):  # Start from 0.01
+            for min_impurity_decrease in reversed(np.arange(0.01, 0.5, 0.1)):  # Start from 0.01
                 decision_tree_classifier = DecisionTreeClassifier(
                     max_depth=best_max_depth,
                     min_sample_split=best_min_sample_split,
@@ -116,9 +114,10 @@ class improvement:
                 current_accuracy = np.mean(predictions == y_val)
                 gridsearch_accuracies.append((current_accuracy, min_impurity_decrease, decision_tree_classifier))
 
-            best_accuracy, best_min_impurity_decrease, best_classifier = sorted(
-                gridsearch_accuracies, key=lambda param: (-param[0], -param[1])
-            )[0]
+            # Select the classifier with the highest accuracy
+            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+            (best_accuracy, best_min_impurity_decrease, best_classifier) = max(gridsearch_accuracies,
+                                                                          key=lambda param: param[0])
 
             print("\nBest accuracy for current fold: ", best_accuracy)
             print("Best max_depth: ", best_max_depth)
