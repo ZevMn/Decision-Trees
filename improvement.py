@@ -87,9 +87,9 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
         best_classifiers (list): List of 10 trained DecisionTreeClassifiers using the best parameters.
     """
     # Define the hyperparameter ranges to test
-    max_depths = [None, 3, 6, 9, 12]
-    min_sample_splits = range(1, 3)
-    min_impurity_decreases = np.linspace(0.1, 0.5, num=5)
+    max_depths = [10, 12, 15, 18, None]  # More depth, but not extreme
+    min_sample_splits = [2, 4, 6]  # Avoids overfitting while being flexible
+    min_impurity_decreases = np.linspace(0.01, 0.1, num=5)
     param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
     # Grid search for all combinations of parameters
