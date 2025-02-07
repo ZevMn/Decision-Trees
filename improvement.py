@@ -48,16 +48,27 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
     print("Best accuracy:", best_accuracy)
     print("Best combination:", best_combination)
 
-    # Make predictions on the test set
+    # Model 1: Training a decision tree using best parameters
+    improved_tree = DecisionTreeClassifier()
+    improved_tree.fit(x_train,
+                      y_train,
+                      max_depth=best_combination[0],
+                      min_sample_split=best_combination[1],
+                      min_impurity_decrease=best_combination[2]
+                      )
+    single_tree_predictions = improved_tree.predict(x_test)
+
+
+    # Model 2: Using 10 trees to do majority vote
     predictions = []
     for tree in classifiers:
         predictions.append(tree.predict(x_test))
-    predictions = np.array(predictions) # Convert to numpy array
-
-    # Use majority voting to combine predictions
+    predictions = np.array(predictions)
     majority_predictions = majority_vote(predictions)
 
-    return majority_predictions
+
+    return single_tree_predictions, majority_predictions
+
 
 def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
     """
@@ -129,7 +140,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
     print("Best min_sample_split: ", best_combination[1])
     print("Best min_impurity_decrease: ", best_combination[2])
 
-    return best_accuracy, best_combination, best_classifiers  # Return all 10 classifiers
+    return best_accuracy, best_combination, best_classifiers
 
 
 

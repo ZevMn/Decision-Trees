@@ -153,6 +153,9 @@ if __name__ == "__main__":
     print("PART 4: IMPROVING OUR DECISION TREE")
     print("-----------------------------------")
 
-    print("Performing k-fold cross-validation on the full dataset...")
-    kfold_validator = train_and_predict(x_full, y_full, x_test, x_val, y_val, n_folds=10)
-    evaluate(y_test, kfold_validator, "K-fold")
+    majority_voting_preds, single_tree_preds = train_and_predict(x_full, y_full, x_test, x_val, y_val, n_folds=10)
+    print("Evaluating 'improved' single tree model")
+    evaluate(y_test, single_tree_preds, "Single Tree")
+    print("Evaluating 'improved' majority voting model")
+    evaluate(y_test, majority_voting_preds, "Majority Voting")
+
