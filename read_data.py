@@ -5,7 +5,7 @@ import matplotlib.pylab as pylab
 params = {'legend.fontsize': 'medium',
           'figure.figsize': (15, 5),
          'axes.labelsize': 'large',
-         'axes.titlesize':'x-large',
+         'axes.titlesize':'xx-large',
          'xtick.labelsize':'medium',
          'ytick.labelsize':'medium'}
 pylab.rcParams.update(params)

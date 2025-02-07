@@ -176,14 +176,15 @@ def plot_confusion_matrix(confusion, class_labels, title="Confusion Matrix"):
     sns.heatmap(
         confusion,
         annot=True,
-        fmt=".2f",  # Use floating-point format with 2 decimal places
+        fmt=".2f",  
         cmap="Blues",
         xticklabels=class_labels,
         yticklabels=class_labels
     )
-    plt.title(f"Confusion Matrix {title}")
+    plt.title(f"Confusion Matrix {title}", fontsize=25, pad=20)
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    plt.savefig(f"Confusion_{title}.png")
     plt.show()
 
 def plot_metrics(y_gold, y_prediction, confusion, class_labels=None, title="Precision, Recall, and F1 Score per Class"):
@@ -217,12 +218,12 @@ def plot_metrics(y_gold, y_prediction, confusion, class_labels=None, title="Prec
     for metric_name, values in metrics.items():
         plt.plot(class_labels, values, marker='o', label=metric_name)
 
-    plt.title(f"Evaluation metrics for {title}")
+    plt.title(f"Evaluation metrics for {title}", fontsize=25, pad=20)
     plt.xlabel("Class Labels")
     plt.ylabel("Score")
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.savefig(f"Eval_{title}.png")
 
 def evaluate(y_gold, y_prediction, title, class_labels=None):
     """
