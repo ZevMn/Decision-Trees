@@ -181,9 +181,9 @@ def plot_confusion_matrix(confusion, class_labels, title="Confusion Matrix"):
         xticklabels=class_labels,
         yticklabels=class_labels
     )
-    plt.title(f"Confusion Matrix {title}", fontsize=25, pad=20)
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
+    plt.title(f"Confusion Matrix {title}", fontsize=20, pad=20)
+    plt.xlabel("Predicted", fontsize=14)
+    plt.ylabel("Actual", fontsize=14)
     plt.savefig(f"Confusion_{title}.png")
     plt.show()
 
@@ -218,9 +218,9 @@ def plot_metrics(y_gold, y_prediction, confusion, class_labels=None, title="Prec
     for metric_name, values in metrics.items():
         plt.plot(class_labels, values, marker='o', label=metric_name)
 
-    plt.title(f"Evaluation metrics for {title}", fontsize=25, pad=20)
-    plt.xlabel("Class Labels")
-    plt.ylabel("Score")
+    plt.title(f"Evaluation metrics for {title}", fontsize=20, pad=20)
+    plt.xlabel("Class Labels", fontsize=14)
+    plt.ylabel("Score", fontsize=14)
     plt.legend()
     plt.grid()
     plt.savefig(f"Eval_{title}.png")
