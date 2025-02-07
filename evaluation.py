@@ -218,9 +218,9 @@ def plot_metrics(y_gold, y_prediction, confusion, class_labels=None, title="Prec
     for metric_name, values in metrics.items():
         plt.plot(class_labels, values, marker='o', label=metric_name)
 
-    plt.title(f"Evaluation metrics for {title}", fontsize=20, pad=20)
-    plt.xlabel("Class Labels", fontsize=14)
-    plt.ylabel("Score", fontsize=14)
+    plt.title(f"Evaluation metrics for {title}", fontsize=24, pad=20)
+    plt.xlabel("Class Labels", fontsize=18)
+    plt.ylabel("Score", fontsize=18)
     plt.legend()
     plt.grid()
     plt.savefig(f"Eval_{title}.png")
