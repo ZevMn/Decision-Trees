@@ -43,21 +43,15 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
     numpy.ndarray: A numpy array of shape (M, ) containing the predicted class label for each instance in x_test
     """
 
-    (best_accuracy,
-     best_combination,
-     gridsearch_optimised_tree) = grid_search(x_train, y_train, n_folds)
+    best_accuracy, best_combination, best_classifier = grid_search(x_train, y_train, n_folds)
 
-    improved_tree = DecisionTreeClassifier()
-    improved_tree.fit(x_train,
-                      y_train,
-                      max_depth=best_combination[0],
-                      min_sample_split=best_combination[1],
-                      min_impurity_decrease=best_combination[2]
-                      )
+    print("Best accuracy:", best_accuracy)
+    print("Best combination:", best_combination)
 
-    return improved_tree.predict(x_test)
+    return best_classifier.predict(x_test)
 
-def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
+
+def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
 
     # Perform grid search, i.e.
     # evaluate DecisionTreeClassifier for many possible combinations of
@@ -117,7 +111,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng()):
 
     return best_accuracy, best_combination, best_classifier
 
-def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng()):
+def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng(42)):
 
     # Split the dataset into k splits of indices
     split_indices = k_fold_split(n_instances, n_folds, random_generator=random_generator)

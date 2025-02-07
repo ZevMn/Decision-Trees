@@ -2,7 +2,7 @@ import numpy as np
 
 from classification import DecisionTreeClassifier
 
-def k_fold_split(n_instances, n_folds=10, random_generator=np.random.default_rng()):
+def k_fold_split(n_instances, n_folds=10, random_generator=np.random.default_rng(42)):
     """
     Splits dataset indices into k folds using random shuffling.
 
@@ -21,7 +21,7 @@ def k_fold_split(n_instances, n_folds=10, random_generator=np.random.default_rng
 
     return split_indices
 
-def train_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng()):
+def train_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng(42)):
     """ Generate train, validation, and test indices for k-fold.
 
     Args:
