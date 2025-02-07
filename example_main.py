@@ -171,8 +171,8 @@ if __name__ == "__main__":
 
 
     print("Improving decision tree model (train_full)")
-    single_tree_preds, majority_vote_preds = train_and_predict(x_full, y_full, x_test, x_val, y_val, n_folds=10)
+    single_tree_preds = train_and_predict(x_full, y_full, x_test, x_val, y_val, n_folds=10)
     print("Evaluating 'improved' single tree model (train_full)")
     evaluate(y_test, single_tree_preds, "Single Tree")
-    print("Evaluating 'improved' majority voting model (train_full")
-    evaluate(y_test, majority_vote_preds, "Majority Voting")
+    #print("Evaluating 'improved' majority voting model (train_full")
+    #evaluate(y_test, majority_vote_preds, "Majority Voting")

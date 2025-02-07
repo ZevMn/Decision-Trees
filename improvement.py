@@ -49,9 +49,9 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
     # Make predictions for majority voting
     predictions = [tree.predict(x_test) for tree in classifiers]
     predictions = np.array(predictions)
-    majority_predictions = majority_vote(predictions)
+    #majority_predictions = majority_vote(predictions)
 
-    return single_tree_predictions, majority_predictions
+    return single_tree_predictions
 
 
 def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
