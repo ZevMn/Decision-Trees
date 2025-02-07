@@ -3,15 +3,15 @@
 # Coursework 1 Skeleton code
 # Prepared by: Josiah Wang
 #
-# Your tasks: Complete the train_and_predict() function. 
-#             You are free to add any other methods as needed. 
+# Your tasks: Complete the train_and_predict() function.
+#             You are free to add any other methods as needed.
 ##############################################################################
 
 import numpy as np
 import itertools
 
 from classification import DecisionTreeClassifier
-from kfold import k_fold_split
+from kfold import k_fold_split, majority_vote
 
 
 def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
@@ -43,52 +43,66 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
     numpy.ndarray: A numpy array of shape (M, ) containing the predicted class label for each instance in x_test
     """
 
-    best_accuracy, best_combination, best_classifier = grid_search(x_train, y_train, n_folds)
+    best_accuracy, best_combination, classifiers = grid_search(x_train, y_train, n_folds)
 
     print("Best accuracy:", best_accuracy)
     print("Best combination:", best_combination)
 
-    return best_classifier.predict(x_test)
+    # Make predictions on the test set
+    predictions = []
+    for tree in classifiers:
+        predictions.append(tree.predict(x_test))
+    predictions = np.array(predictions) # Convert to numpy array
 
+    # Use majority voting to combine predictions
+    majority_predictions = majority_vote(predictions)
+
+    return majority_predictions
 
 def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
+    """
+    Perform grid search to evaluate DecisionTreeClassifier for many possible combinations of
+    max_depth, min_sample_split, and min_impurity_decrease, using k-fold cross-validation.
 
-    # Perform grid search, i.e.
-    # evaluate DecisionTreeClassifier for many possible combinations of
-    # max_depth, min_sample_split, min_impurity_decrease
+    Args:
+        x (np.array): Feature matrix.
+        y (np.array): Target vector.
+        n_folds (int): Number of folds for k-fold cross-validation.
+        random_generator: Random number generator for consistent splits.
 
+    Returns:
+        best_accuracy (float): Best average accuracy across folds.
+        best_combination (tuple): Best hyperparameter combination.
+        best_classifiers (list): List of 10 trained DecisionTreeClassifiers using the best parameters.
+    """
     # Define the hyperparameter ranges to test
-    max_depths = [None, 5, 10]
+    max_depths = [None, 3, 6, 9, 12]
     min_sample_splits = range(1, 3)
-    min_impurity_decreases = np.arange(0.1, 0.5, 5)
+    min_impurity_decreases = np.linspace(0.1, 0.5, num=5)
     param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
     # Grid search for all combinations of parameters
-    gridsearch_accuracies = []
+    gridsearch_results = []
 
     # Iterate through all combinations of hyperparameters
     for combination in param_combinations:
-        # Initialise the decision tree with current hyperparameters
-        decision_tree_classifier = DecisionTreeClassifier(
-            max_depth=combination[0],
-            min_sample_split=combination[1],
-            min_impurity_decrease=combination[2]
-        )
+        fold_accuracies = []  # Store accuracy for each fold
+        fold_classifiers = []  # Store trained models for each fold
 
-        list_of_folds = train_val_test_k_fold(len(x), n_folds, random_generator)
-
-        # Iterate through each set of folds (perform k-fold cross validation)
-        for i, (train_indices, val_indices, test_indices) in enumerate(list_of_folds):
-
-            fold_accuracies = []
+        # Perform k-fold cross-validation
+        for train_indices, val_indices, test_indices in train_val_test_k_fold(len(x), n_folds, random_generator):
+            # Initialise the decision tree with current hyperparameters
+            decision_tree_classifier = DecisionTreeClassifier(
+                max_depth=combination[0],
+                min_sample_split=combination[1],
+                min_impurity_decrease=combination[2]
+            )
 
             # Set up the dataset for the current fold
             x_train = x[train_indices, :]
             y_train = y[train_indices]
             x_val = x[val_indices, :]
             y_val = y[val_indices]
-            x_test = x[test_indices, :]
-            y_test = y[test_indices]
 
             # Train the decision tree on the training folds
             decision_tree_classifier.fit(x_train, y_train)
@@ -96,36 +110,28 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
             # Predict labels on the validation fold
             predictions = decision_tree_classifier.predict(x_val)
 
-            # Compute the accuracy for the current fold
+            # Compute accuracy for the current fold
             current_accuracy = np.mean(predictions == y_val)
+            fold_accuracies.append(current_accuracy)
+            fold_classifiers.append(decision_tree_classifier)
 
-            # Store the current accuracy along with the parameter combination
-            fold_accuracies.append((current_accuracy, combination, decision_tree_classifier))
+        # Compute the average accuracy across all folds
+        average_accuracy = np.mean(fold_accuracies)
 
-            # After training on each iteration in this set of folds
-            if i == len(list_of_folds) - 1:
-                # Select the classifier with the highest accuracy
-                # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-                (best_accuracy, best_combination, best_classifier) = max(fold_accuracies,
-                                                                         key=lambda param: param[0])
+        # Store the results for this parameter combination
+        gridsearch_results.append((average_accuracy, combination, fold_classifiers))
 
-                # Evaluate the best model for this set of folds on the test fold
-                predictions_on_test = decision_tree_classifier.predict(x_test)
-                best_accuracy = np.mean(predictions_on_test == y_test)
+    # Select the best parameter combination based on highest average accuracy
+    best_accuracy, best_combination, best_classifiers = max(gridsearch_results, key=lambda param: param[0])
 
-                gridsearch_accuracies.append((best_accuracy, best_combination, best_classifier))
-
-    # Select the classifier with the highest accuracy
-    # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
-    (best_accuracy, best_combination, best_classifier) = max(gridsearch_accuracies,
-                                                                       key=lambda param: param[0])
-
-    print("\nBest accuracy: ", best_accuracy)
+    print("\nBest average accuracy: ", best_accuracy)
     print("Best max_depth: ", best_combination[0])
     print("Best min_sample_split: ", best_combination[1])
     print("Best min_impurity_decrease: ", best_combination[2])
 
-    return best_accuracy, best_combination, best_classifier
+    return best_accuracy, best_combination, best_classifiers  # Return all 10 classifiers
+
+
 
 def train_val_test_k_fold(n_instances, n_folds=10, random_generator=np.random.default_rng(42)):
 
