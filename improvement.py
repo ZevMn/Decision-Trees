@@ -15,40 +15,19 @@ from kfold import k_fold_split, majority_vote
 
 
 def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
-    """ Interface to train and test the new/improved decision tree.
-
-    This function is an interface for training and testing the new/improved
-    decision tree classifier.
-
-    x_train and y_train should be used to train your classifier, while
-    x_test should be used to test your classifier.
-    x_val and y_val may optionally be used as the validation dataset.
-    You can just ignore x_val and y_val if you do not need a validation dataset.
-
-    Args:
-    x_train (numpy.ndarray): Training instances, numpy array of shape (N, K)
-                       N is the number of instances
-                       K is the number of attributes
-    y_train (numpy.ndarray): Class labels, numpy array of shape (N, )
-                       Each element in y is a str
-    x_test (numpy.ndarray): Test instances, numpy array of shape (M, K)
-                            M is the number of test instances
-                            K is the number of attributes
-    x_val (numpy.ndarray): Validation instances, numpy array of shape (L, K)
-                       L is the number of validation instances
-                       K is the number of attributes
-    y_val (numpy.ndarray): Class labels of validation set, numpy array of shape (L, )
-
-    Returns:
-    numpy.ndarray: A numpy array of shape (M, ) containing the predicted class label for each instance in x_test
+    """
+    Train and test the decision tree using predefined or optimized parameters.
     """
 
-    best_accuracy, best_combination, classifiers = grid_search(x_train, y_train, n_folds)
+    # Use known best parameters instead of performing grid search
+    best_combination = (None, 6, 0.055)  # (max_depth, min_sample_split, min_impurity_decrease)
 
-    print("Best accuracy:", best_accuracy)
-    print("Best combination:", best_combination)
+    print("Using predefined best parameters:")
+    print("Best max_depth:", best_combination[0])
+    print("Best min_sample_split:", best_combination[1])
+    print("Best min_impurity_decrease:", best_combination[2])
 
-    # Model 1: Training a decision tree using best parameters
+    # Train the improved decision tree with best parameters
     improved_tree = DecisionTreeClassifier()
     improved_tree.fit(x_train,
                       y_train,
@@ -58,14 +37,19 @@ def train_and_predict(x_train, y_train, x_test, x_val, y_val, n_folds=10):
                       )
     single_tree_predictions = improved_tree.predict(x_test)
 
+    # Train multiple trees for majority voting
+    classifiers = []
+    for _ in range(10):
+        tree = DecisionTreeClassifier()
+        tree.fit(x_train, y_train, max_depth=best_combination[0],
+                 min_sample_split=best_combination[1],
+                 min_impurity_decrease=best_combination[2])
+        classifiers.append(tree)
 
-    # Model 2: Using 10 trees to do majority vote
-    predictions = []
-    for tree in classifiers:
-        predictions.append(tree.predict(x_test))
+    # Make predictions for majority voting
+    predictions = [tree.predict(x_test) for tree in classifiers]
     predictions = np.array(predictions)
     majority_predictions = majority_vote(predictions)
-
 
     return single_tree_predictions, majority_predictions
 
