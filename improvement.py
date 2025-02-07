@@ -60,7 +60,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
     # Define the hyperparameter ranges to test
     max_depths = [None, 5, 10]
     min_sample_splits = range(1, 3)
-    min_impurity_decreases = np.linspace(0.1, 0.5, num=3)
+    min_impurity_decreases = np.arange(0.1, 0.5, 5)
     param_combinations = cartesian_product_matrix(max_depths, min_sample_splits, min_impurity_decreases)
 
     # Grid search for all combinations of parameters
