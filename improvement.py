@@ -79,6 +79,8 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
         for i, (train_indices, val_indices, test_indices) in enumerate(
                 train_val_test_k_fold(len(x), n_folds, random_generator)):
 
+            fold_accuracies = []
+
             # Set up the dataset for the current fold
             x_train = x[train_indices, :]
             y_train = y[train_indices]
@@ -97,7 +99,18 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
             current_accuracy = np.mean(predictions == y_val)
 
             # Store the current accuracy along with the parameter combination
-            gridsearch_accuracies.append((current_accuracy, combination, decision_tree_classifier))
+            fold_accuracies.append((current_accuracy, combination, decision_tree_classifier))
+
+            # Select the classifier with the highest accuracy
+            # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
+            (best_accuracy, best_combination, best_classifier) = max(fold_accuracies,
+                                                                     key=lambda param: param[0])
+
+            # Evaluate the best model for this set of folds on the test fold
+            predictions_on_test = decision_tree_classifier.predict(x_test)
+            best_accuracy = np.mean(predictions_on_test == y_test)
+
+            gridsearch_accuracies.append((best_accuracy, best_combination, best_classifier))
 
     # Select the classifier with the highest accuracy
     # NB: key=lambda x:x[0] sorts the list by the first tuple element (the accuracy)
