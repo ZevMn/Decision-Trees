@@ -34,11 +34,6 @@ def confusion_matrix(y_gold, y_prediction, class_labels=None):
         # Get predictions where the ground truth is the current class label
         indices = (y_gold == label)
 
-        # Debug: Check indices and prediction types
-        print(f"Processing label {label}")
-        print(f"Indices type: {type(indices)}, Shape: {indices.shape}")
-        print(f"y_prediction type: {type(y_prediction)}, Shape: {y_prediction.shape}")
-
         # Ensure proper indexing
         if np.issubdtype(indices.dtype, np.bool_):
             predictions = y_prediction[indices]
