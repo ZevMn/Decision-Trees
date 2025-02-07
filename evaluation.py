@@ -18,6 +18,10 @@ def confusion_matrix(y_gold, y_prediction, class_labels=None):
         np.array: Confusion matrix.
     """
 
+    # Ensure input is a NumPy array
+    y_gold = np.array(y_gold)
+    y_prediction = np.array(y_prediction)
+
     # If no class_labels are given, obtain the set of unique class labels
     if class_labels is None:
         class_labels = np.unique(np.concatenate((y_gold, y_prediction)))
@@ -29,7 +33,17 @@ def confusion_matrix(y_gold, y_prediction, class_labels=None):
     for (i, label) in enumerate(class_labels):
         # Get predictions where the ground truth is the current class label
         indices = (y_gold == label)
-        predictions = y_prediction[indices]
+
+        # Debug: Check indices and prediction types
+        print(f"Processing label {label}")
+        print(f"Indices type: {type(indices)}, Shape: {indices.shape}")
+        print(f"y_prediction type: {type(y_prediction)}, Shape: {y_prediction.shape}")
+
+        # Ensure proper indexing
+        if np.issubdtype(indices.dtype, np.bool_):
+            predictions = y_prediction[indices]
+        else:
+            predictions = y_prediction[np.where(indices)]  # Ensure valid indexing
 
         # Quick way to get the counts per label
         (unique_labels, counts) = np.unique(predictions, return_counts=True)

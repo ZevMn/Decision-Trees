@@ -95,7 +95,7 @@ def grid_search(x, y, n_folds=10, random_generator=np.random.default_rng(42)):
     # Grid search for all combinations of parameters
     gridsearch_results = []
 
-    # Iterate through all combinations of hyperparameters
+    # Iterate through all combinations of hyperparameter
     for combination in param_combinations:
         fold_accuracies = []  # Store accuracy for each fold
         fold_classifiers = []  # Store trained models for each fold
