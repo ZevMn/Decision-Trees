@@ -184,7 +184,6 @@ def plot_confusion_matrix(confusion, class_labels, title="Confusion Matrix"):
     plt.title(f"Confusion Matrix {title}", fontsize=25, pad=20)
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    plt.savefig(f"Confusion_{title}.png")
     plt.show()
 
 def plot_metrics(y_gold, y_prediction, confusion, class_labels=None, title="Precision, Recall, and F1 Score per Class"):
@@ -223,7 +222,7 @@ def plot_metrics(y_gold, y_prediction, confusion, class_labels=None, title="Prec
     plt.ylabel("Score")
     plt.legend()
     plt.grid()
-    plt.savefig(f"Eval_{title}.png")
+    plt.show()
 
 def evaluate(y_gold, y_prediction, title, class_labels=None):
     """
