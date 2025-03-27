@@ -28,4 +28,3 @@ The official test set is ``test.txt``.
 - ``improvement.py``
 
 	* Contains the code for the ``train_and_predict()`` function. This function was completed as an interface to the new/improved decision tree classifier.
- * 
